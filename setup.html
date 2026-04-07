@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>初期設定 — 思い出アルバム</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600;700&family=Shippori+Mincho:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f5f0e8;
+    --warm-white: #faf7f2;
+    --sepia: #8b6f47;
+    --dark-sepia: #5c4a2a;
+    --gold: #c9a84c;
+    --gold-light: #e8d5a3;
+    --shadow-dark: #2a1f0e;
+    --ink: #1a1208;
+    --faded: #a09070;
+    --red: #c05050;
+    --green: #5a9a5a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: linear-gradient(160deg, #1a1208 0%, #2d2010 50%, #3d2c14 100%);
+    font-family: 'Noto Serif JP', serif;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    background: var(--warm-white);
+    border-radius: 4px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,168,76,0.2);
+    animation: fadeIn 0.5s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    background: linear-gradient(180deg, #f0ebe0, var(--warm-white));
+    border-bottom: 1px solid rgba(139,111,71,0.2);
+    padding: 1.8rem 2rem 1.5rem;
+    text-align: center;
+    border-radius: 4px 4px 0 0;
+  }
+  .header-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+    opacity: 0.8;
+  }
+  .card-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--dark-sepia);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.3rem;
+  }
+  .card-sub {
+    font-size: 0.78rem;
+    color: var(--faded);
+    line-height: 1.6;
+  }
+
+  .card-body { padding: 1.8rem 2rem; }
+
+  .form-group { margin-bottom: 1.2rem; }
+  .form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--sepia);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.4rem;
+  }
+  .form-label .req {
+    font-size: 0.62rem;
+    color: var(--red);
+    background: rgba(192,80,80,0.08);
+    border: 1px solid rgba(192,80,80,0.2);
+    border-radius: 2px;
+    padding: 0 0.3rem;
+  }
+  .form-input {
+    width: 100%;
+    background: #fff;
+    border: 1px solid rgba(139,111,71,0.35);
+    border-radius: 2px;
+    padding: 0.6rem 0.85rem;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .form-input:focus {
+    border-color: var(--sepia);
+    box-shadow: 0 0 0 3px rgba(139,111,71,0.08);
+  }
+  .form-input.error {
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(192,80,80,0.08);
+  }
+  .form-hint {
+    font-size: 0.72rem;
+    color: var(--faded);
+    margin-top: 0.3rem;
+    line-height: 1.5;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid rgba(139,111,71,0.15);
+    margin: 1.4rem 0;
+  }
+
+  .pw-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .error-msg {
+    background: rgba(192,80,80,0.08);
+    border: 1px solid rgba(192,80,80,0.2);
+    border-left: 3px solid var(--red);
+    border-radius: 0 2px 2px 0;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.78rem;
+    color: #a04040;
+    margin-bottom: 1rem;
+    display: none;
+    line-height: 1.5;
+  }
+  .error-msg.show { display: block; }
+
+  .success-msg {
+    background: rgba(90,154,90,0.08);
+    border: 1px solid rgba(90,154,90,0.2);
+    border-left: 3px solid var(--green);
+    border-radius: 0 2px 2px 0;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.78rem;
+    color: #3a7a3a;
+    margin-bottom: 1rem;
+    display: none;
+    line-height: 1.5;
+  }
+  .success-msg.show { display: block; }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--gold);
+    border: none;
+    border-radius: 2px;
+    padding: 0.85rem;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--shadow-dark);
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: background 0.2s, transform 0.1s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary:hover { background: var(--gold-light); }
+  .btn-primary:active { transform: scale(0.99); }
+  .btn-primary:disabled {
+    background: rgba(201,168,76,0.4);
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    display: block;
+    text-align: center;
+    margin-top: 0.75rem;
+    font-size: 0.78rem;
+    color: var(--faded);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    width: 100%;
+    font-family: 'Noto Serif JP', serif;
+  }
+  .btn-secondary:hover { color: var(--sepia); }
+
+  .card-footer {
+    padding: 1rem 2rem 1.5rem;
+    text-align: center;
+    border-top: 1px solid rgba(139,111,71,0.1);
+    font-size: 0.72rem;
+    color: var(--faded);
+    line-height: 1.7;
+    background: #f5f0e8;
+    border-radius: 0 0 4px 4px;
+  }
+
+  /* 保存済みの場合の既存設定表示 */
+  .existing-config {
+    background: rgba(201,168,76,0.07);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 2px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.2rem;
+    font-size: 0.78rem;
+    color: var(--sepia);
+    display: none;
+  }
+  .existing-config.show { display: block; }
+  .existing-config strong {
+    color: var(--dark-sepia);
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+
+  /* スピナー */
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(42,31,14,0.2);
+    border-top-color: var(--shadow-dark);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 0.4rem;
+    display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .btn-primary.loading .spinner { display: inline-block; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <div class="header-badge">⚙ Setup</div>
+    <div class="card-title">初期設定</div>
+    <div class="card-sub">アルバムの基本情報とパスワードを設定してください<br>設定はこのブラウザに保存されます</div>
+  </div>
+
+  <div class="card-body">
+
+    <div class="existing-config" id="existingConfig">
+      <strong>⚠️ 既存の設定が見つかりました</strong>
+      保存済みの設定を上書きします。以下のフォームを入力して「設定を保存」してください。
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="success-msg" id="successMsg"></div>
+
+    <div class="form-group">
+      <label class="form-label">
+        学校名
+        <span class="req">必須</span>
+      </label>
+      <input class="form-input" type="text" id="schoolName" placeholder="例：〇〇高等学校">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">
+        卒業年
+        <span class="req">必須</span>
+      </label>
+      <input class="form-input" type="text" id="year" placeholder="例：2024年3月卒業">
+    </div>
+
+    <hr class="divider">
+
+    <div class="pw-row">
+      <div class="form-group">
+        <label class="form-label">
+          閲覧パスワード
+          <span class="req">必須</span>
+        </label>
+        <input class="form-input" type="text" id="viewPw" placeholder="クラスメートに共有">
+        <div class="form-hint">全員に教えるパスワード</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">
+          管理パスワード
+          <span class="req">必須</span>
+        </label>
+        <input class="form-input" type="text" id="adminPw" placeholder="幹事だけが知るPW">
+        <div class="form-hint">閲覧PWと別にすること</div>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="saveBtn" onclick="saveConfig()">
+      <span class="spinner" id="spinner"></span>
+      設定を保存してアルバムへ →
+    </button>
+
+    <button class="btn-secondary" onclick="goBack()">
+      設定せずにアルバムに戻る
+    </button>
+
+  </div>
+
+  <div class="card-footer">
+    🔒 入力した情報はこのブラウザのみに保存されます。<br>
+    外部サーバーには送信されません。
+  </div>
+</div>
+
+<script>
+  const SKEY_CONFIG = 'sotsuaru_v5_config';
+
+  // 既存設定があれば表示
+  window.addEventListener('load', () => {
+    try {
+      const raw = localStorage.getItem(SKEY_CONFIG);
+      if (raw) {
+        const cfg = JSON.parse(raw);
+        document.getElementById('existingConfig').classList.add('show');
+        // フォームに既存値をセット
+        if (cfg.schoolName) document.getElementById('schoolName').value = cfg.schoolName;
+        if (cfg.year) document.getElementById('year').value = cfg.year;
+        if (cfg.viewPw) document.getElementById('viewPw').value = cfg.viewPw;
+        if (cfg.adminPw) document.getElementById('adminPw').value = cfg.adminPw;
+      }
+    } catch(e) {}
+  });
+
+  function saveConfig() {
+    const schoolName = document.getElementById('schoolName').value.trim();
+    const year = document.getElementById('year').value.trim();
+    const viewPw = document.getElementById('viewPw').value.trim();
+    const adminPw = document.getElementById('adminPw').value.trim();
+
+    const errEl = document.getElementById('errorMsg');
+    const sucEl = document.getElementById('successMsg');
+    errEl.classList.remove('show');
+    sucEl.classList.remove('show');
+
+    // バリデーション
+    if (!schoolName) {
+      showError('学校名を入力してください');
+      document.getElementById('schoolName').classList.add('error');
+      return;
+    }
+    if (!year) {
+      showError('卒業年を入力してください');
+      document.getElementById('year').classList.add('error');
+      return;
+    }
+    if (!viewPw) {
+      showError('閲覧パスワードを入力してください');
+      document.getElementById('viewPw').classList.add('error');
+      return;
+    }
+    if (!adminPw) {
+      showError('管理パスワードを入力してください');
+      document.getElementById('adminPw').classList.add('error');
+      return;
+    }
+    if (viewPw === adminPw) {
+      showError('閲覧パスワードと管理パスワードは別々にしてください');
+      document.getElementById('viewPw').classList.add('error');
+      document.getElementById('adminPw').classList.add('error');
+      return;
+    }
+
+    // エラースタイルをリセット
+    ['schoolName','year','viewPw','adminPw'].forEach(id => {
+      document.getElementById(id).classList.remove('error');
+    });
+
+    // 保存
+    const config = { schoolName, year, viewPw, adminPw };
+    localStorage.setItem(SKEY_CONFIG, JSON.stringify(config));
+
+    // 成功表示してからリダイレクト
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.classList.add('loading');
+    document.getElementById('spinner').style.display = 'inline-block';
+
+    sucEl.textContent = `✓ 設定を保存しました！「${schoolName} ${year}」のアルバムに移動します...`;
+    sucEl.classList.add('show');
+
+    setTimeout(() => {
+      window.location.href = './index.html';
+    }, 1500);
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = msg;
+    el.classList.add('show');
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function goBack() {
+    window.location.href = './index.html';
+  }
+
+  // Enterキーで保存
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveConfig();
+  });
+</script>
+</body>
+</html>
