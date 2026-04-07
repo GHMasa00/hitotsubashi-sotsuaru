@@ -568,7 +568,13 @@ async function syncFromDrive() {
     if (dfId) { const raw = await dlFile(dfId); const d = JSON.parse(raw); photos = d.photos || []; }
 
     // ── photosフォルダ（個人ポートレート）取得 ──
-    const pfId = await findDriveFolder('photos');
+    // photos/photosという二重フォルダ構造に対応
+    let pfId = await findDriveFolder('photos');
+    if (pfId) {
+      // その中にさらにphotosフォルダがあれば、そちらを使う
+      const innerPfId = await findDriveFolderIn('photos', pfId);
+      if (innerPfId) pfId = innerPfId;
+    }
     if (pfId) {
       const res = await gapi.client.drive.files.list({
         q: `'${pfId}' in parents and trashed=false and mimeType contains 'image/'`,
@@ -642,6 +648,14 @@ async function syncFromDrive() {
 async function findDriveFolder(name) {
   try {
     const q = `name='${name}' and '${DRIVE_FOLDER_ID}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+    const r = await gapi.client.drive.files.list({ q, fields: 'files(id)', spaces: 'drive' });
+    return r.result.files[0]?.id || null;
+  } catch { return null; }
+}
+
+async function findDriveFolderIn(name, parentId) {
+  try {
+    const q = `name='${name}' and '${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
     const r = await gapi.client.drive.files.list({ q, fields: 'files(id)', spaces: 'drive' });
     return r.result.files[0]?.id || null;
   } catch { return null; }
