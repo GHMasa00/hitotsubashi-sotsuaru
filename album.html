@@ -557,6 +557,8 @@ async function mkFolder(name, pid) {
 
 // ── Drive同期 ──
 async function syncFromDrive() {
+  // 毎回最新データを取得するためキャッシュをクリア
+  localStorage.removeItem('sotsuaru_v6_data');
   try {
     // configをDriveから取得
     const cfgId = await findFile(CONFIG_FILE);
