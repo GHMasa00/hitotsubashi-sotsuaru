@@ -628,9 +628,10 @@ async function syncFromDrive() {
       }));
     }
 
-    // ポートレートはDriveの直接URLを使用（高速・都度認証）
+    // ポートレートはGoogleドライブのサムネイルURLを使用
+    // （認証不要・高速）
     portraits.forEach(p => {
-      p.url = `https://www.googleapis.com/drive/v3/files/${p.driveId}?alt=media&access_token=${accessToken}`;
+      p.url = `https://drive.google.com/thumbnail?id=${p.driveId}&sz=w400`;
     });
 
     saveCache();
