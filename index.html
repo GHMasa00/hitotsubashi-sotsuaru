@@ -118,8 +118,8 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 .class-grid{display:flex;flex-direction:column;gap:.75rem;padding:.85rem .75rem 1.5rem;}
 .class-card{background:var(--warm);border-radius:8px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.45),0 0 0 1px rgba(201,168,76,.18);cursor:pointer;transition:transform .15s,box-shadow .15s;animation:fadeUp .35s ease both;}
 .class-card:active{transform:scale(.98);}
-.class-thumb{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;background:#2a1f0e;}
-.class-thumb img{width:100%;height:100%;object-fit:cover;display:block;filter:sepia(12%) contrast(.96) brightness(1.02);}
+.class-thumb{position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;background:#1a1208;}
+.class-thumb img{width:100%;height:100%;object-fit:contain;display:block;filter:sepia(12%) contrast(.96) brightness(1.02);background:#1a1208;}
 .class-thumb-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2a1f0e,#3a2c14);color:rgba(201,168,76,.3);font-size:3rem;}
 .class-label{padding:.65rem .75rem;border-top:1px solid rgba(139,111,71,.15);display:flex;align-items:center;justify-content:center;}
 .class-name{font-family:'Shippori Mincho',serif;font-size:1rem;font-weight:600;color:var(--sepia-d);letter-spacing:.1em;}
@@ -327,7 +327,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
   <div class="pw-hint">幹事の方は管理パスワードを入力すると管理画面に入れます</div>
   <div class="pw-line"></div>
   <div style="margin-top:1.2rem;text-align:center">
-    <button onclick="localStorage.removeItem('sotsuaru_v5_config');config=null;showScreen('setupScreen');" style="display:block;width:100%;max-width:280px;background:rgba(139,111,71,.2);border:1px solid rgba(139,111,71,.4);color:rgba(200,180,140,.9);font-size:.9rem;cursor:pointer;font-family:'Noto Serif JP',serif;padding:.85rem 1.4rem;border-radius:8px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin:0 auto;">⚙ 初期設定をやり直す</button>
+    <button onclick="confirmReset()" style="display:block;width:100%;max-width:280px;background:rgba(139,111,71,.2);border:1px solid rgba(139,111,71,.4);color:rgba(200,180,140,.9);font-size:.9rem;cursor:pointer;font-family:'Noto Serif JP',serif;padding:.85rem 1.4rem;border-radius:8px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin:0 auto;">⚙ 初期設定をやり直す</button>
   </div>
 </div>
 
@@ -601,6 +601,27 @@ function showScreen(id){
   // ナビ切り替え
   $('viewNav').classList.toggle('on', id==='viewScreen');
   $('adminNav').classList.toggle('on', id==='adminScreen');
+}
+
+
+// ── 初期設定リセット（管理PW確認付き）────────────────────────
+function confirmReset(){
+  if(!config){
+    // configがない場合はそのままセットアップへ
+    showScreen('setupScreen');
+    return;
+  }
+  const entered = prompt('管理パスワードを入力してください');
+  if(entered === null) return; // キャンセル
+  if(entered === config.adminPw){
+    localStorage.removeItem(SKEY_CONFIG);
+    config = null;
+    $('viewMenuBg')?.classList.remove('on');
+    if($('viewMenuSheet')) $('viewMenuSheet').style.display='none';
+    showScreen('setupScreen');
+  } else {
+    alert('管理パスワードが違います');
+  }
 }
 
 // ── 起動処理 ─────────────────────────────────────────
@@ -999,13 +1020,7 @@ $('mToAdmin').onclick=()=>{
   $('viewMenuBg').classList.remove('on');$('viewMenuSheet').style.display='none';
   showScreen('pwScreen');$('pwSchoolName').textContent=`${config.schoolName}　${config.year}卒業`;
 };
-$('mSetupReset').onclick=()=>{
-  if(confirm('初期設定をやり直しますか？（データは削除されません）')){
-    localStorage.removeItem(SKEY_CONFIG);config=null;
-    $('viewMenuBg').classList.remove('on');$('viewMenuSheet').style.display='none';
-    showScreen('setupScreen');
-  }
-};
+$('mSetupReset').onclick=()=>{ confirmReset(); };
 
 // ════════════════════════════════════════════════════════
 // 管理画面
