@@ -3,419 +3,177 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>思い出アルバム</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700&family=Shippori+Mincho:wght@400;600;800&display=swap" rel="stylesheet">
-<script src="https://apis.google.com/js/api.js"></script>
-<script src="https://accounts.google.com/gsi/client"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* ══════════════════════════════════════
-   CSS変数・リセット
-══════════════════════════════════════ */
 :root {
-  --gold:#c9a84c; --gold-l:#e8d5a3; --gold-d:#9a7a2a;
-  --bg:#1a1208; --bg2:#2a1f0e; --bg3:#3a2c14;
-  --cream:#f5f0e8; --warm:#faf7f2;
-  --sepia:#8b6f47; --sepia-d:#5c4a2a;
-  --ink:#1a1208; --faded:#a09070;
-  --red:#c05050; --green:#4a8a4a; --blue:#3a7ab0;
-  --safe-t:env(safe-area-inset-top);
-  --safe-b:env(safe-area-inset-bottom);
+  --gold:#c9a84c; --bg:#1a1208; --bg2:#2a1f0e; --cream:#f5f0e8; --red:#c05050;
 }
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-
-/* bodyのfixedを解除してスクロール可能に */
-body{
-  background:var(--bg);
-  font-family:'Noto Serif JP',serif;
-  color:var(--ink);
+/* 全体レイアウト */
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { 
+  background: var(--bg); 
+  color: var(--cream); 
+  font-family: 'Noto Serif JP', serif;
   min-height: 100vh;
-  width: 100%;
+  line-height: 1.6;
 }
 
-/* ══════════════════════════════════════
-   共通ユーティリティ
-══════════════════════════════════════ */
-.screen{display:none; min-height:100vh; width:100%;}
-.screen.on{display:block;}
+/* 画面切り替え設定 */
+.screen { display: none; padding: 20px; width: 100%; min-height: 100vh; }
+.screen.on { display: block; }
+#setupScreen.on, #pwScreen.on { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
-/* Flex中央揃えが必要な画面 */
-#setupScreen.on, #pwScreen.on {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
+/* 共通コンポーネント */
+.card { background: #faf7f2; color: #1a1208; border-radius: 12px; padding: 25px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.fg { margin-bottom: 15px; }
+.fl { display: block; font-size: 0.8rem; margin-bottom: 5px; font-weight: bold; color: #5c4a2a; }
+.fi { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; outline: none; }
+.btn { width: 100%; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: 0.2s; margin-top: 10px; }
+.btn-prim { background: var(--gold); color: var(--bg); }
+.btn-reset { background: none; border: 1px solid rgba(201,168,76,0.5); color: var(--gold); margin-top: 40px; font-size: 0.8rem; }
 
-.btn{background:transparent;border:1px solid rgba(201,168,76,.4);border-radius:8px;color:var(--gold-l);font-family:'Noto Serif JP',serif;font-size:.85rem;padding:.55rem 1rem;cursor:pointer;transition:all .2s;white-space:nowrap; touch-action: manipulation;}
-.btn:active{background:rgba(201,168,76,.15);}
-.btn.prim{background:var(--gold);border-color:var(--gold);color:var(--bg);font-weight:600;}
-.btn.full{width:100%;justify-content:center;display:flex;align-items:center;gap:.5rem;}
+/* 閲覧・管理画面用 */
+.header { text-align: center; padding: 20px 0; border-bottom: 2px solid var(--gold); margin-bottom: 20px; width: 100%; }
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding-bottom: 80px; }
+.photo-item { background: #fff; border-radius: 8px; overflow: hidden; color: #333; }
+.photo-item img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
+.photo-info { padding: 8px; font-size: 0.8rem; }
+
+/* ナビゲーション */
+nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg2); display: none; border-top: 1px solid var(--gold); z-index: 100; }
+nav.on { display: flex; }
+.nav-btn { flex: 1; padding: 15px; text-align: center; background: none; border: none; color: var(--cream); font-size: 0.7rem; cursor: pointer; }
 
 /* ローディング */
-#loading{position:fixed;inset:0;z-index:9999;background:rgba(10,7,2,.88);backdrop-filter:blur(6px);display:none;flex-direction:column;align-items:center;justify-content:center;gap:1rem;}
-#loading.on{display:flex;}
-.spin{width:44px;height:44px;border:3px solid rgba(201,168,76,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.load-txt{color:var(--gold-l);font-size:.88rem;}
-
-/* ═══════════════════════════════════════
-   画面1: セットアップ
-═══════════════════════════════════════ */
-#setupScreen{
-  background:linear-gradient(160deg,var(--bg),var(--bg2) 60%,var(--bg3));
-  padding:2rem 1.5rem;
-}
-.setup-logo{font-family:'Shippori Mincho',serif;font-size:1.8rem;font-weight:800;color:var(--gold-l);letter-spacing:.2em;margin-bottom:.4rem;text-align:center;}
-.setup-logo span{color:var(--gold);}
-.setup-sub{color:var(--faded);font-size:.78rem;text-align:center;margin-bottom:1.8rem;}
-.setup-card{background:var(--warm);border-radius:12px;padding:1.5rem;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.4);}
-.setup-card h2{font-family:'Shippori Mincho',serif;font-size:1rem;color:var(--sepia-d);margin-bottom:1.2rem;border-bottom:1px solid rgba(139,111,71,.2);padding-bottom:.5rem;}
-.fg{margin-bottom:.9rem;}
-.fl{display:block;font-size:.72rem;color:var(--sepia);margin-bottom:.3rem;font-weight:600;}
-.fi{width:100%;background:#fff;border:1px solid rgba(139,111,71,.28);border-radius:6px;padding:.6rem .8rem;color:var(--ink);outline:none;font-size:16px;}
-
-.drive-connect-btn{display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%;background:#fff;border:1.5px solid rgba(58,122,176,.4);border-radius:8px;padding:.75rem;cursor:pointer;color:var(--blue);margin:1rem 0;}
-
-/* ═══════════════════════════════════════
-   画面2: パスワード入力
-═══════════════════════════════════════ */
-#pwScreen{
-  background:linear-gradient(160deg,var(--bg),var(--bg2) 60%,var(--bg3));
-  padding:2rem 1.5rem;
-}
-.pw-logo{font-family:'Shippori Mincho',serif;font-size:2rem;font-weight:800;color:var(--gold-l);margin-bottom:0.5rem;}
-.pw-school{color:var(--gold);font-size:.9rem;margin-bottom:1.5rem;text-align:center;}
-.pw-field{width:100%;max-width:300px;display:flex;flex-direction:column;gap:1rem;}
-#pwInput{background:rgba(255,255,255,0.1);border:1.5px solid var(--gold);border-radius:8px;padding:.85rem;color:var(--cream);text-align:center;font-size:1.1rem;width:100%;}
-#pwEnterBtn{background:var(--gold);border:none;border-radius:8px;padding:.9rem;color:var(--bg);font-weight:800;cursor:pointer;font-size:1.1rem;}
-
-.reset-btn-wrap {margin-top: 2.5rem; width: 100%; max-width: 300px;}
-.btn-reset {
-  display: block; width: 100%; background: rgba(255,255,255,0.05); 
-  border: 1px solid rgba(201,168,76,0.3); color: var(--faded);
-  padding: 0.8rem; border-radius: 8px; font-size: 0.85rem; cursor: pointer;
-}
-
-/* ═══════════════════════════════════════
-   閲覧画面・ヘッダー
-═══════════════════════════════════════ */
-.sp-header{background:var(--bg2); border-bottom:2px solid var(--gold); padding: 1.5rem 1rem 1rem; text-align:center;}
-.sp-header h1{font-family:'Shippori Mincho',serif; color:var(--gold-l); font-size: 1.4rem;}
-.grid-wrap{padding:1rem 0.5rem 6rem;}
-.photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;}
-
-/* ボトムナビ */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--bg2);border-top:1px solid var(--gold);display:none;padding-bottom:var(--safe-b);}
-.bottom-nav.on{display:flex;}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:.6rem;background:none;border:none;color:var(--faded);cursor:pointer;}
-.nav-item.on, .nav-item:active{color:var(--gold);}
-
-/* モーダル */
-.modal-bg{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.85);backdrop-filter:blur(5px);align-items:center;justify-content:center;padding:1rem;}
-.modal-bg.on{display:flex;}
-.modal{background:var(--warm);width:100%;max-width:500px;border-radius:12px;max-height:90vh;overflow-y:auto;padding:1.5rem;}
-
-/* スライドショー */
-.ss{display:none;position:fixed;inset:0;z-index:2000;background:#000;flex-direction:column;align-items:center;justify-content:center;}
-.ss.on{display:flex;}
-.ss-img{max-width:100%;max-height:70vh;object-fit:contain;}
-
+#loading { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; }
+#loading.on { display: flex; }
 </style>
 </head>
 <body>
 
-<div id="loading">
-  <div class="spin"></div>
-  <div class="load-txt" id="loadTxt">読み込み中...</div>
-</div>
+<div id="loading"><div>読み込み中...</div></div>
 
 <div id="setupScreen" class="screen">
-  <div class="setup-logo">思い出<span>アルバム</span></div>
-  <div class="setup-sub">初期設定</div>
-  <div class="setup-card">
+  <div class="card">
+    <h2 style="margin-bottom:20px; text-align:center;">初期設定</h2>
     <div class="fg">
       <label class="fl">学校名</label>
-      <input class="fi" id="setupSchool" type="text" placeholder="例：○○中学校">
+      <input class="fi" id="setupSchool" placeholder="例：○○中学校">
     </div>
     <div class="fg">
-      <label class="fl">卒業年</label>
-      <input class="fi" id="setupYear" type="text" placeholder="例：1990年">
+      <label class="fl">閲覧用パスワード</label>
+      <input class="fi" id="setupViewPw" placeholder="クラス全員用">
     </div>
     <div class="fg">
-      <label class="fl">閲覧パスワード（全員用）</label>
-      <input class="fi" id="setupViewPw" type="text">
+      <label class="fl">管理用パスワード</label>
+      <input class="fi" id="setupAdminPw" placeholder="幹事専用">
     </div>
-    <div class="fg">
-      <label class="fl">管理パスワード（幹事用）</label>
-      <input class="fi" id="setupAdminPw" type="text">
-    </div>
-    <button class="drive-connect-btn" id="setupDriveBtn">Google Driveに接続する</button>
-    <button class="btn prim full" id="setupDoneBtn">完了して保存</button>
-    <div id="setupErr" style="color:var(--red); font-size:0.8rem; margin-top:0.5rem; text-align:center;"></div>
+    <button class="btn btn-prim" onclick="handleSetup()">設定を保存して開始</button>
   </div>
 </div>
 
 <div id="pwScreen" class="screen">
-  <div class="pw-logo">思い出<span>アルバム</span></div>
-  <div class="pw-school" id="pwSchoolName"></div>
-  <div class="pw-field">
-    <input id="pwInput" type="password" placeholder="パスワードを入力">
-    <button id="pwEnterBtn">開く</button>
-    <div id="pwErr" style="color:var(--red); text-align:center; font-size:0.8rem;"></div>
+  <h1 style="color:var(--gold); margin-bottom:10px;">思い出アルバム</h1>
+  <div id="pwSchoolLabel" style="margin-bottom:30px;"></div>
+  <div class="card">
+    <div class="fg">
+      <input class="fi" id="pwInput" type="password" placeholder="パスワードを入力" style="text-align:center;">
+    </div>
+    <button class="btn btn-prim" onclick="handleLogin()">アルバムを開く</button>
+    <div id="pwErr" style="color:var(--red); text-align:center; margin-top:10px; font-size:0.8rem;"></div>
   </div>
-  <div class="reset-btn-wrap">
-    <button class="btn-reset" onclick="resetAllConfig()">⚙ 初期設定をやり直す</button>
-  </div>
+  <button class="btn btn-reset" onclick="resetConfig()">⚙ 初期設定をやり直す</button>
 </div>
 
 <div id="viewScreen" class="screen">
-  <div class="sp-header">
-    <h1>思い出<span>アルバム</span></h1>
-    <p id="viewSchoolLabel" style="color:var(--faded); font-size:0.8rem;"></p>
+  <div class="header">
+    <h2 id="viewSchoolTitle">思い出アルバム</h2>
   </div>
-  <div style="padding:0.8rem; background:var(--bg3);">
-    <input id="viewSearch" type="search" placeholder="🔍 名前・検索" style="width:100%; padding:0.6rem; border-radius:20px; border:none; background:rgba(255,255,255,0.1); color:#fff; outline:none;">
-  </div>
-  <div class="grid-wrap">
-    <div class="photo-grid" id="viewGrid"></div>
-  </div>
+  <div class="grid" id="viewGrid"></div>
 </div>
 
 <div id="adminScreen" class="screen">
-  <div class="sp-header">
-    <h1>管理<span>画面</span></h1>
-    <p id="adminSchoolLabel" style="color:var(--faded); font-size:0.8rem;"></p>
+  <div class="header">
+    <h2>アルバム管理</h2>
   </div>
-  <div style="padding:0.5rem; background:var(--blue); color:#fff; font-size:0.7rem; text-align:center;" id="driveMsg">
-    Drive未接続
+  <div style="text-align:center; margin-bottom:20px;">
+    <button class="btn btn-prim" style="width:200px;" onclick="document.getElementById('fileIn').click()">＋ 写真を追加</button>
+    <input type="file" id="fileIn" multiple accept="image/*" style="display:none" onchange="uploadPhotos(this.files)">
   </div>
-  <div class="grid-wrap">
-    <div class="admin-grid" id="adminGrid" style="display:grid; grid-template-columns:repeat(2,1fr); gap:0.5rem; padding:0.5rem;"></div>
-  </div>
+  <div class="grid" id="adminGrid"></div>
 </div>
 
-<nav class="bottom-nav" id="viewNav">
-  <button class="nav-item" onclick="startSS()"><span>▶</span><small>スライド</small></button>
-  <button class="nav-item" onclick="showScreen('pwScreen')"><span>🔑</span><small>戻る</small></button>
+<nav id="mainNav">
+  <button class="nav-btn" onclick="showScreen('viewScreen'); renderView();">アルバム</button>
+  <button class="nav-btn" onclick="showScreen('adminScreen'); renderAdmin();">管理</button>
+  <button class="nav-btn" onclick="location.reload()">閉じる</button>
 </nav>
-
-<nav class="bottom-nav" id="adminNav">
-  <button class="nav-item" onclick="document.getElementById('fileInput').click()"><span>➕</span><small>追加</small></button>
-  <button class="nav-item" onclick="syncFromDrive()"><span>🔄</span><small>同期</small></button>
-  <button class="nav-item" onclick="showScreen('viewScreen'); renderViewGrid();"><span>👁</span><small>閲覧</small></button>
-</nav>
-
-<input type="file" id="fileInput" multiple accept="image/*" style="display:none">
-
-<div class="ss" id="ss">
-  <img class="ss-img" id="ssImg">
-  <div style="color:#fff; margin-top:1rem; text-align:center;">
-    <div id="ssName" style="font-size:1.2rem; font-weight:bold;"></div>
-    <div id="ssCnt" style="font-size:0.8rem; opacity:0.6;"></div>
-  </div>
-  <div style="position:fixed; bottom:2rem; display:flex; gap:1rem;">
-    <button class="btn" onclick="showSlide(ssIdx-1)">◀</button>
-    <button class="btn" onclick="stopSS()">✕ 閉じる</button>
-    <button class="btn" onclick="showSlide(ssIdx+1)">▶</button>
-  </div>
-</div>
 
 <script>
-// --- 基本設定 ---
-const GAPI_CLIENT_ID = '1060250626561-rs6tnhuhvr61qorkdhkitp6bnki12dn1.apps.googleusercontent.com';
-const DRIVE_FOLDER_ID = '1oUajUSeZo9sHTp60jdXalfHPKsx2m-1m';
-const SKEY_DATA = 'sotsuaru_v5_data';
-const SKEY_CONFIG = 'sotsuaru_v5_config';
+const SKEY_CONFIG = 'album_config_v5';
+const SKEY_DATA = 'album_data_v5';
+let config = JSON.parse(localStorage.getItem(SKEY_CONFIG));
+let photos = JSON.parse(localStorage.getItem(SKEY_DATA)) || [];
 
-let photos = [];
-let config = null;
-let accessToken = null;
-let tokenClient = null;
-
-const $ = (id) => document.getElementById(id);
-
-// --- 初期化 ---
+// ページ起動時の振り分け
 window.onload = () => {
-  const savedConfig = localStorage.getItem(SKEY_CONFIG);
-  if (savedConfig) {
-    config = JSON.parse(savedConfig);
-    showScreen('pwScreen');
-    $('pwSchoolName').textContent = config.schoolName + " " + config.year;
-  } else {
+  if (!config) {
     showScreen('setupScreen');
+  } else {
+    document.getElementById('pwSchoolLabel').textContent = config.school;
+    showScreen('pwScreen');
   }
-  
-  const savedData = localStorage.getItem(SKEY_DATA);
-  if (savedData) photos = JSON.parse(savedData);
-  
-  initGAPI();
 };
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
-  $(id).classList.add('on');
-  $('viewNav').classList.toggle('on', id === 'viewScreen');
-  $('adminNav').classList.toggle('on', id === 'adminScreen');
-  window.scrollTo(0, 0);
+  const target = document.getElementById(id);
+  if(target) target.classList.add('on');
+  
+  // ナビ表示制御
+  const nav = document.getElementById('mainNav');
+  nav.className = (id === 'viewScreen' || id === 'adminScreen') ? 'on' : '';
 }
 
-function resetAllConfig() {
-  if(confirm("初期設定をやり直します。よろしいですか？")) {
+// セットアップ保存
+function handleSetup() {
+  const school = document.getElementById('setupSchool').value;
+  const vpw = document.getElementById('setupViewPw').value;
+  const apw = document.getElementById('setupAdminPw').value;
+  
+  if(!school || !vpw || !apw) return alert("すべて入力してください");
+  
+  config = { school, viewPw: vpw, adminPw: apw };
+  localStorage.setItem(SKEY_CONFIG, JSON.stringify(config));
+  location.reload();
+}
+
+// ログイン処理
+function handleLogin() {
+  const input = document.getElementById('pwInput').value;
+  if (input === config.adminPw) {
+    showScreen('adminScreen');
+    renderAdmin();
+  } else if (input === config.viewPw) {
+    showScreen('viewScreen');
+    renderView();
+  } else {
+    document.getElementById('pwErr').textContent = "パスワードが違います";
+  }
+}
+
+// リセット
+function resetConfig() {
+  if(confirm("設定をリセットします。よろしいですか？")) {
     localStorage.removeItem(SKEY_CONFIG);
     location.reload();
   }
 }
 
-// --- パスワード処理 ---
-$('pwEnterBtn').onclick = () => {
-  const val = $('pwInput').value;
-  if (!config) return;
-  
-  if (val === config.adminPw) {
-    showScreen('adminScreen');
-    $('adminSchoolLabel').textContent = config.schoolName;
-    renderAdminGrid();
-  } else if (val === config.viewPw) {
-    showScreen('viewScreen');
-    $('viewSchoolLabel').textContent = config.schoolName;
-    renderViewGrid();
-  } else {
-    $('pwErr').textContent = "パスワードが正しくありません";
-    setTimeout(() => { $('pwErr').textContent = ""; }, 2000);
-  }
-};
-
-// --- グリッド描画 ---
-function renderViewGrid() {
-  const grid = $('viewGrid');
-  grid.innerHTML = "";
-  photos.forEach(p => {
-    const div = document.createElement('div');
-    div.style.background = "#fff";
-    div.style.borderRadius = "8px";
-    div.style.overflow = "hidden";
-    div.innerHTML = `
-      <img src="${p.url}" style="width:100%; aspect-ratio:1; object-fit:cover;">
-      <div style="padding:0.5rem; font-size:0.8rem; color:#333;">${p.name || '名前未登録'}</div>
-    `;
-    grid.appendChild(div);
-  });
-}
-
-function renderAdminGrid() {
-  const grid = $('adminGrid');
-  grid.innerHTML = "";
-  photos.forEach((p, idx) => {
-    const div = document.createElement('div');
-    div.style.background = "#eee";
-    div.style.padding = "5px";
-    div.innerHTML = `
-      <img src="${p.url}" style="width:100%; aspect-ratio:1; object-fit:cover;">
-      <input type="text" value="${p.name || ''}" placeholder="名前" style="width:100%; margin-top:4px;" onchange="updateName(${idx}, this.value)">
-      <button onclick="deletePhoto(${idx})" style="width:100%; background:#c05050; color:#fff; border:none; margin-top:4px; font-size:0.7rem; padding:3px;">削除</button>
-    `;
-    grid.appendChild(div);
-  });
-}
-
-function updateName(idx, val) {
-  photos[idx].name = val;
-  saveData();
-}
-
-function deletePhoto(idx) {
-  if(confirm("削除しますか？")) {
-    photos.splice(idx, 1);
-    saveData();
-    renderAdminGrid();
-  }
-}
-
-function saveData() {
-  localStorage.setItem(SKEY_DATA, JSON.stringify(photos));
-}
-
-// --- セットアップ保存 ---
-$('setupDoneBtn').onclick = () => {
-  const c = {
-    schoolName: $('setupSchool').value,
-    year: $('setupYear').value,
-    viewPw: $('setupViewPw').value,
-    adminPw: $('setupAdminPw').value
-  };
-  if(!c.schoolName || !c.viewPw || !c.adminPw) {
-    $('setupErr').textContent = "必須項目を入力してください";
-    return;
-  }
-  localStorage.setItem(SKEY_CONFIG, JSON.stringify(c));
-  location.reload();
-};
-
-// --- Google Drive API 簡易版 ---
-function initGAPI() {
-  try {
-    gapi.load('client', async () => {
-      await gapi.client.init({discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"]});
-    });
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: GAPI_CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/drive.file',
-      callback: (res) => {
-        accessToken = res.access_token;
-        $('driveMsg').textContent = "Drive接続済み";
-      }
-    });
-  } catch(e) { console.log(e); }
-}
-
-$('setupDriveBtn').onclick = () => {
-  tokenClient.requestAccessToken();
-};
-
-async function syncFromDrive() {
-  if(!accessToken) {
-    tokenClient.requestAccessToken();
-    return;
-  }
-  alert("同期機能：フォルダ内をスキャンします（実装済み想定）");
-}
-
-// --- スライドショー ---
-let ssIdx = 0;
-function startSS() {
-  if(photos.length === 0) return;
-  $('ss').classList.add('on');
-  showSlide(0);
-}
-function stopSS() { $('ss').classList.remove('on'); }
-function showSlide(n) {
-  if(n < 0) n = photos.length - 1;
-  if(n >= photos.length) n = 0;
-  ssIdx = n;
-  $('ssImg').src = photos[ssIdx].url;
-  $('ssName').textContent = photos[ssIdx].name || "名前未登録";
-  $('ssCnt').textContent = (ssIdx + 1) + " / " + photos.length;
-}
-
-// 写真追加（Base64変換して保存）
-$('fileInput').onchange = (e) => {
-  const files = e.target.files;
-  for(let f of files) {
+// 写真アップロード（Base64保存）
+function uploadPhotos(files) {
+  document.getElementById('loading').classList.add('on');
+  let count = 0;
+  for (let f of files) {
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      photos.push({
-        id: Date.now() + Math.random(),
-        url: ev.target.result,
-        name: ""
-      });
-      saveData();
-      renderAdminGrid();
-    };
-    reader.readAsDataURL(f);
-  }
-};
-</script>
-</body>
-</html>
