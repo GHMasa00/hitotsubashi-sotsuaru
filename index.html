@@ -115,17 +115,15 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 ═══════════════════════════════════════ */
 #viewScreen{background:var(--bg);}
 /* クラスグリッド */
-.class-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;padding:.85rem .75rem 0;}
-@media(min-width:480px){.class-grid{grid-template-columns:repeat(3,1fr);}}
-@media(min-width:768px){.class-grid{grid-template-columns:repeat(4,1fr);gap:1rem;}}
-.class-card{background:var(--warm);border-radius:8px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.45),0 0 0 1px rgba(201,168,76,.18);cursor:pointer;transition:transform .15s,box-shadow .15s;animation:fadeUp .35s ease both;}
-.class-card:active{transform:scale(.97);}
-.class-card-hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.5),0 0 0 1px rgba(201,168,76,.35);}
-.class-thumb{position:relative;aspect-ratio:4/3;overflow:hidden;background:#2a1f0e;}
+.class-grid{display:flex;flex-direction:column;gap:.75rem;padding:.85rem .75rem 0;}
+.class-card{background:var(--warm);border-radius:8px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.45),0 0 0 1px rgba(201,168,76,.18);cursor:pointer;transition:transform .15s,box-shadow .15s;animation:fadeUp .35s ease both;display:flex;flex-direction:row;align-items:stretch;}
+.class-card:active{transform:scale(.98);}
+.class-thumb{position:relative;width:140px;flex-shrink:0;overflow:hidden;background:#2a1f0e;}
 .class-thumb img{width:100%;height:100%;object-fit:cover;display:block;filter:sepia(12%) contrast(.96) brightness(1.02);}
 .class-thumb-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2a1f0e,#3a2c14);color:rgba(201,168,76,.3);font-size:2rem;}
-.class-label{padding:.5rem .6rem .6rem;border-top:1px solid rgba(139,111,71,.15);display:flex;align-items:center;justify-content:center;}
-.class-name{font-family:'Shippori Mincho',serif;font-size:.9rem;font-weight:600;color:var(--sepia-d);letter-spacing:.05em;}
+.class-label{flex:1;padding:.75rem 1rem;border-left:1px solid rgba(139,111,71,.15);display:flex;align-items:center;}
+.class-name{font-family:'Shippori Mincho',serif;font-size:1.05rem;font-weight:600;color:var(--sepia-d);letter-spacing:.08em;}
+.class-arrow{margin-left:auto;color:rgba(139,111,71,.4);font-size:1rem;}
 .search-bar{position:sticky;top:0;z-index:50;background:var(--bg2);border-bottom:1px solid rgba(201,168,76,.15);padding:.6rem .75rem;display:flex;gap:.5rem;align-items:center;}
 #viewSearch{flex:1;background:rgba(245,240,232,.08);border:1px solid rgba(201,168,76,.25);border-radius:20px;padding:.5rem .9rem;color:var(--cream);outline:none;transition:border-color .2s;}
 #viewSearch::placeholder{color:rgba(160,144,112,.45);}
@@ -344,31 +342,31 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
   <div class="class-grid" id="classGrid">
     <div class="class-card" data-class="1">
       <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1zEbEPKEHiE3jBNefNAuAiyr2ggDZr-eo&sz=w400" alt="3年1組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
-      <div class="class-label"><span class="class-name">3年1組</span></div>
+      <div class="class-label"><span class="class-name">3年1組</span><span class="class-arrow">›</span></div>
     </div>
     <div class="class-card" data-class="2">
       <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1ZVk27Weatz7IcsEu-K7tB5UhINk8X10-&sz=w400" alt="3年2組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
-      <div class="class-label"><span class="class-name">3年2組</span></div>
+      <div class="class-label"><span class="class-name">3年2組</span><span class="class-arrow">›</span></div>
     </div>
     <div class="class-card" data-class="3">
       <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1tBXYgTu65zf_JKIo8OkQRiieR-FrhuqD&sz=w400" alt="3年3組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
-      <div class="class-label"><span class="class-name">3年3組</span></div>
+      <div class="class-label"><span class="class-name">3年3組</span><span class="class-arrow">›</span></div>
     </div>
     <div class="class-card" data-class="4">
       <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1vQJGvAElE9wAiwo5p7Kji0SEWamk2B85&sz=w400" alt="3年4組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
-      <div class="class-label"><span class="class-name">3年4組</span></div>
+      <div class="class-label"><span class="class-name">3年4組</span><span class="class-arrow">›</span></div>
     </div>
     <div class="class-card" data-class="5">
       <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1lVGJ0KmKr08e5QjialpLAiqch1tDFHC6&sz=w400" alt="3年5組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
-      <div class="class-label"><span class="class-name">3年5組</span></div>
+      <div class="class-label"><span class="class-name">3年5組</span><span class="class-arrow">›</span></div>
     </div>
     <div class="class-card" data-class="6">
       <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1V7SyV0SkCLz0g36wtvxG3mlkSxoWxC94&sz=w400" alt="3年6組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
-      <div class="class-label"><span class="class-name">3年6組</span></div>
+      <div class="class-label"><span class="class-name">3年6組</span><span class="class-arrow">›</span></div>
     </div>
     <div class="class-card" data-class="7">
       <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1q9ENebnRAHkoJlW7jRO2EluP8RS_Y7IM&sz=w400" alt="3年7組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
-      <div class="class-label"><span class="class-name">3年7組</span></div>
+      <div class="class-label"><span class="class-name">3年7組</span><span class="class-arrow">›</span></div>
     </div>
   </div>
   <div class="search-bar">
