@@ -79,8 +79,9 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 ═══════════════════════════════════════ */
 #pwScreen{
   background:linear-gradient(160deg,var(--bg),var(--bg2) 60%,var(--bg3));
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:2rem 1.5rem;padding-top:calc(2rem + var(--safe-t));min-height:100vh;gap:1.2rem;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:3rem 1.5rem 3rem;padding-top:calc(3rem + var(--safe-t));min-height:100vh;gap:1.2rem;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
 }
 .pw-logo{font-family:'Shippori Mincho',serif;font-size:2rem;font-weight:800;color:var(--gold-l);letter-spacing:.2em;text-shadow:0 2px 24px rgba(201,168,76,.4);}
 .pw-logo span{color:var(--gold);}
@@ -311,7 +312,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
   <div class="pw-hint">幹事の方は管理パスワードを入力すると管理画面に入れます</div>
   <div class="pw-line"></div>
   <div style="margin-top:1.2rem;text-align:center">
-    <button onclick="localStorage.removeItem('sotsuaru_v5_config');config=null;showScreen('setupScreen');" style="background:transparent;border:none;color:rgba(160,144,112,.35);font-size:.68rem;cursor:pointer;font-family:sans-serif;text-decoration:underline;padding:.3rem;">⚙ 初期設定をやり直す</button>
+    <button onclick="localStorage.removeItem('sotsuaru_v5_config');config=null;showScreen('setupScreen');" style="display:block;width:100%;max-width:280px;background:rgba(139,111,71,.2);border:1px solid rgba(139,111,71,.4);color:rgba(200,180,140,.9);font-size:.9rem;cursor:pointer;font-family:'Noto Serif JP',serif;padding:.85rem 1.4rem;border-radius:8px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin:0 auto;">⚙ 初期設定をやり直す</button>
   </div>
 </div>
 
