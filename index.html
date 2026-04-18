@@ -106,35 +106,57 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 .header-actions{position:absolute;right:.75rem;top:50%;transform:translateY(-50%);margin-top:calc(var(--safe-t)/2);}
 
 /* ═══════════════════════════════════════
-   画面3: 閲覧画面
+   画面3: 閲覧画面（新設計）
 ═══════════════════════════════════════ */
 #viewScreen{background:var(--bg);}
-.search-bar{position:sticky;top:0;z-index:50;background:var(--bg2);border-bottom:1px solid rgba(201,168,76,.15);padding:.6rem .75rem;display:flex;gap:.5rem;align-items:center;}
-#viewSearch{flex:1;background:rgba(245,240,232,.08);border:1px solid rgba(201,168,76,.25);border-radius:20px;padding:.5rem .9rem;color:var(--cream);outline:none;transition:border-color .2s;}
+
+/* ── トップビュー ── */
+.view-search-bar{position:sticky;top:0;z-index:50;background:var(--bg2);border-bottom:1px solid rgba(201,168,76,.15);padding:.65rem .75rem;display:flex;gap:.5rem;align-items:center;}
+#viewSearch{flex:1;background:rgba(245,240,232,.08);border:1px solid rgba(201,168,76,.25);border-radius:20px;padding:.5rem .9rem;color:var(--cream);outline:none;font-size:16px;transition:border-color .2s;}
 #viewSearch::placeholder{color:rgba(160,144,112,.45);}
 #viewSearch:focus{border-color:var(--gold);}
-.tabs{display:flex;gap:.4rem;padding:.5rem .75rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;background:var(--bg2);border-bottom:1px solid rgba(201,168,76,.1);}
-.tabs::-webkit-scrollbar{display:none;}
-.tab{background:transparent;border:1px solid rgba(201,168,76,.2);border-radius:14px;color:rgba(160,144,112,.7);font-family:'Noto Serif JP',serif;font-size:.72rem;padding:.35rem .75rem;white-space:nowrap;cursor:pointer;transition:all .2s;flex-shrink:0;}
-.tab.on{background:rgba(201,168,76,.18);border-color:var(--gold);color:var(--gold);}
-.grid-wrap{padding:.75rem .6rem 7rem;}
-.photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;}
-@media(min-width:480px){.photo-grid{grid-template-columns:repeat(3,1fr);}}
-@media(min-width:768px){.photo-grid{grid-template-columns:repeat(4,1fr);gap:.9rem;}}
-.photo-card{background:var(--warm);border-radius:6px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.45),0 0 0 1px rgba(201,168,76,.18);cursor:pointer;position:relative;animation:fadeUp .35s ease both;transition:transform .15s;}
-.photo-card:active{transform:scale(.97);}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.img-wrap{position:relative;aspect-ratio:3/4;overflow:hidden;background:#c8bca8;}
-.img-wrap img{width:100%;height:100%;object-fit:cover;display:block;filter:sepia(12%) contrast(.96) brightness(1.02);}
-.img-wrap .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.3rem;background:#c8bca8;color:#8b6f47;font-size:.7rem;}
-.type-badge{position:absolute;top:5px;left:5px;background:rgba(26,18,8,.72);border-radius:3px;font-size:.58rem;padding:.12rem .32rem;color:var(--gold-l);backdrop-filter:blur(3px);}
-.card-info{padding:.5rem .55rem .6rem;border-top:1px solid rgba(139,111,71,.12);}
-.c-name{font-family:'Shippori Mincho',serif;font-size:.88rem;font-weight:600;color:var(--sepia-d);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.c-nick{font-size:.7rem;color:var(--sepia);margin-top:.1rem;min-height:.9em;}
-.c-cmt{font-size:.67rem;color:var(--faded);line-height:1.45;margin-top:.15rem;font-style:italic;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:1.9em;}
-.empty{padding:3rem 1.5rem;text-align:center;color:var(--faded);}
-.empty-ic{font-size:3rem;opacity:.28;margin-bottom:.8rem;}
-.empty-t{font-family:'Shippori Mincho',serif;font-size:1rem;color:rgba(201,168,76,.45);margin-bottom:.4rem;}
+
+.class-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem;padding:.75rem;}
+@media(min-width:480px){.class-grid{grid-template-columns:repeat(3,1fr);}}
+.class-card{background:var(--warm);border-radius:8px;overflow:hidden;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.45),0 0 0 1px rgba(201,168,76,.18);transition:transform .15s,box-shadow .15s;position:relative;aspect-ratio:3/4;}
+.class-card:active{transform:scale(.97);box-shadow:0 1px 6px rgba(0,0,0,.5);}
+.class-card-thumb{width:100%;height:100%;object-fit:cover;display:block;filter:sepia(15%) contrast(.92) brightness(.95);}
+.class-card-placeholder{width:100%;height:100%;background:linear-gradient(160deg,#3a2c14,#2a1f0e);display:flex;align-items:center;justify-content:center;font-size:2rem;}
+.class-card-label{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(10,7,2,.9) 0%,rgba(10,7,2,.5) 60%,transparent 100%);padding:.6rem .5rem .5rem;text-align:center;}
+.class-card-name{font-family:'Shippori Mincho',serif;font-size:.88rem;font-weight:800;color:var(--gold-l);letter-spacing:.1em;}
+.class-card-sub{font-size:.62rem;color:var(--faded);margin-top:.1rem;}
+
+/* ── クラスビュー ── */
+.class-view-header{background:linear-gradient(180deg,var(--bg),var(--bg2));border-bottom:2px solid var(--gold);padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;position:sticky;top:0;z-index:50;}
+.class-back-btn{background:none;border:1px solid rgba(201,168,76,.3);border-radius:6px;color:var(--gold-l);padding:.4rem .7rem;font-size:.78rem;cursor:pointer;white-space:nowrap;font-family:'Noto Serif JP',serif;}
+.class-back-btn:active{background:rgba(201,168,76,.1);}
+.class-view-title{font-family:'Shippori Mincho',serif;font-size:1.1rem;font-weight:800;color:var(--gold-l);letter-spacing:.15em;flex:1;}
+.class-search-bar{padding:.6rem .75rem;background:var(--bg2);border-bottom:1px solid rgba(201,168,76,.1);position:sticky;top:52px;z-index:49;}
+#classSearch{width:100%;background:rgba(245,240,232,.08);border:1px solid rgba(201,168,76,.25);border-radius:20px;padding:.5rem .9rem;color:var(--cream);outline:none;font-size:16px;transition:border-color .2s;}
+#classSearch::placeholder{color:rgba(160,144,112,.45);}
+#classSearch:focus{border-color:var(--gold);}
+
+.class-images-wrap{padding:.75rem;}
+.class-page-img-wrap{position:relative;width:100%;margin-bottom:.75rem;border-radius:8px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.5);}
+.class-page-img{width:100%;display:block;filter:sepia(8%) contrast(.96);}
+.class-page-label{text-align:center;font-size:.7rem;color:var(--faded);padding:.3rem 0 .5rem;letter-spacing:.08em;}
+
+/* 名前ハイライト（検索ヒット） */
+.name-hit-overlay{position:absolute;pointer-events:none;border:2px solid var(--gold);border-radius:4px;box-shadow:0 0 0 2px rgba(201,168,76,.3);animation:hitPulse .6s ease;}
+@keyframes hitPulse{0%{opacity:0;transform:scale(.85)}60%{opacity:1;transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
+
+/* ── ズームオーバーレイ ── */
+.zoom-ov{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.82);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);justify-content:center;align-items:flex-start;padding-top:10vh;}
+.zoom-ov.open{display:flex;}
+.zoom-card{display:flex;flex-direction:column;align-items:center;animation:zoomPop .32s cubic-bezier(.34,1.25,.64,1) both;}
+@keyframes zoomPop{from{opacity:0;transform:scale(.15)}to{opacity:1;transform:scale(1)}}
+.zoom-img-box{border-radius:8px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.75),0 0 0 2px rgba(201,168,76,.45);background-repeat:no-repeat;flex-shrink:0;}
+.zoom-name-plate{margin-top:14px;text-align:center;animation:fadeUp .25s .1s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.zoom-pname{font-family:'Shippori Mincho',serif;font-size:22px;font-weight:700;letter-spacing:.12em;text-shadow:0 2px 10px rgba(0,0,0,.9);}
+.zoom-pname.s{color:#ffd84d;}.zoom-pname.t{color:#4df0ff;}
+.zoom-ptype{font-size:12px;color:rgba(160,144,112,.65);margin-top:4px;letter-spacing:.1em;}
+.zoom-close-hint{margin-top:18px;font-size:12px;color:rgba(255,255,255,.3);}
 
 /* ボトムナビ */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:var(--bg2);border-top:1px solid rgba(201,168,76,.2);display:none;padding-bottom:max(var(--safe-b),0px);}
@@ -316,64 +338,55 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 </div>
 
 <!-- ════════════════════════════════════════
-     画面3: 閲覧画面
+     画面3: 閲覧画面（新設計）
 ════════════════════════════════════════ -->
 <div id="viewScreen" class="screen">
-  <div class="sp-header">
-    <h1>思い出<span>アルバム</span></h1>
-    <p id="viewSchoolLabel"></p>
+
+  <!-- トップビュー -->
+  <div id="topView">
+    <div class="sp-header">
+      <h1>思い出<span>アルバム</span></h1>
+      <p id="viewSchoolLabel"></p>
+      <div class="header-actions">
+        <button class="btn" id="navViewMenuBtn" style="font-size:.75rem;padding:.35rem .6rem;">☰</button>
+      </div>
+    </div>
+    <div class="view-search-bar">
+      <input id="viewSearch" type="search" placeholder="🔍 名前で全クラス検索" autocomplete="off">
+    </div>
+    <div class="class-grid" id="classGrid"></div>
   </div>
-  <div class="search-bar">
-    <input id="viewSearch" type="search" placeholder="🔍 名前・あだ名で検索" autocomplete="off">
+
+  <!-- クラスビュー -->
+  <div id="classView" style="display:none;">
+    <div class="class-view-header">
+      <button class="class-back-btn" id="classBackBtn">◀ 一覧</button>
+      <div class="class-view-title" id="classViewTitle"></div>
+    </div>
+    <div class="class-search-bar">
+      <input id="classSearch" type="search" placeholder="🔍 このクラスで名前検索" autocomplete="off">
+    </div>
+    <div class="class-images-wrap" id="classImagesWrap"></div>
   </div>
-  <div class="tabs" id="viewTabs">
-    <button class="tab on" data-filter="all">すべて</button>
-    <button class="tab" data-filter="graduation">📚 卒業写真</button>
-    <button class="tab" data-filter="current">🙂 現在</button>
-  </div>
-  <div class="grid-wrap">
-    <div class="photo-grid" id="viewGrid"></div>
-  </div>
+
 </div>
 
-<!-- 閲覧用ボトムナビ -->
+<!-- 閲覧ボトムナビ -->
 <nav class="bottom-nav" id="viewNav">
-  <button class="nav-item" id="navSlide">
-    <span class="nav-ic">▶</span><span class="nav-lb">スライドショー</span>
-  </button>
-  <button class="nav-item" id="navViewMenu">
+  <button class="nav-item" id="navViewMenuBtn2">
     <span class="nav-ic">☰</span><span class="nav-lb">メニュー</span>
   </button>
 </nav>
 
-<!-- 写真詳細モーダル -->
-<div class="modal-bg" id="detailModal">
-  <div class="modal">
-    <div class="modal-drag"></div>
-    <div class="modal-header">
-      <span class="modal-title" id="detailTitle">写真の詳細</span>
-      <button class="modal-x" id="detailClose">×</button>
+<!-- ズームオーバーレイ -->
+<div class="zoom-ov" id="zoomOv">
+  <div class="zoom-card">
+    <div class="zoom-img-box" id="zoomImgBox"></div>
+    <div class="zoom-name-plate">
+      <div class="zoom-pname" id="zoomPname"></div>
+      <div class="zoom-ptype" id="zoomPtype"></div>
     </div>
-    <div class="modal-body">
-      <img class="detail-img" id="detailImg" src="" alt="">
-      <div class="detail-name" id="detailName"></div>
-      <div class="detail-nick" id="detailNick"></div>
-      <div class="detail-class" id="detailClass"></div>
-      <div class="detail-cmt-area" id="detailCmtArea" style="display:none">
-        <div class="detail-cmt-label">ひとこと</div>
-        <div class="detail-cmt-text" id="detailCmt"></div>
-      </div>
-      <div class="fg">
-        <div class="my-cmt-wrap">
-          <div class="my-cmt-label">💬 私のコメント（自分のブラウザに保存）</div>
-          <textarea id="myCmtInput" placeholder="この人への思い出を書いてください..."></textarea>
-        </div>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" id="detailClose2">閉じる</button>
-      <button class="btn prim" id="saveMyCmt">コメントを保存</button>
-    </div>
+    <div class="zoom-close-hint">タップで閉じる</div>
   </div>
 </div>
 
@@ -389,6 +402,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
     <span class="menu-ic">⚙️</span><span class="menu-lb">初期設定をやり直す</span>
   </button>
 </div>
+
 
 <!-- ════════════════════════════════════════
      画面4: 管理画面
@@ -646,7 +660,7 @@ $('pwEnterBtn').onclick = $('pwInput').onkeydown = function(e){
     $('pwInput').value = '';
     showScreen('viewScreen');
     $('viewSchoolLabel').textContent = `${config.schoolName} ${config.year}`;
-    renderViewGrid();
+    initViewScreen();
     initGAPIIfNeeded();
     // 閲覧ログイン後にDriveから写真を自動同期
     if(accessToken){ syncFromDrive(); }
@@ -821,7 +835,7 @@ async function syncFromDrive(){
         p.url=await dlDataUrl(p.driveId);
       }
     }
-    saveCache(); renderAdminGrid(); renderViewGrid();
+    saveCache(); renderAdminGrid(); initViewScreen();
     setDrive('ok',`Drive: 同期完了 ✓（${photos.length}枚）`);
   }catch(e){console.error(e);setDrive('ng','同期エラー: '+e.message);}
   finally{unload();}
@@ -860,121 +874,620 @@ function setSt(t,m){
 }
 
 // ════════════════════════════════════════════════════════
-// 閲覧画面
+// 閲覧画面（新設計）
 // ════════════════════════════════════════════════════════
-function getViewFiltered(){
-  const q=$('viewSearch').value.trim();
-  let l=[...photos];
-  if(currentFilter!=='all') l=l.filter(p=>p.type===currentFilter);
-  if(q) l=l.filter(p=>(p.name||'').includes(q)||(p.nick||'').includes(q)||(p.cmt||'').includes(q)||(p.cls||'').includes(q));
-  return l;
+
+// ── 定数 ─────────────────────────────────────────────
+const SCANS_FOLDER_ID = '1JyU4Z6amJgEguPF7Df17NaWJq8J_EkeI';
+const SCAN_FILE_IDS = {
+  '1_01':'19zLP0RgQFjrFId7AJs7rXYpBbLuJF95-',
+  '1_02':'1c8qR0FMqu9rrQ-LREp-dq8QYpiESEezv',
+  '2_01':'1wS0pzw1eYmE41TozeXr71Mt2xFG7W4bH',
+  '2_02':'1XQwOcn9RMdlFs50is_-4JAtoIgEYbEwd',
+  '3_01':'18gyFtN54p-clYb7h6OpPfSFDUl3etl6D',
+  '3_02':'19FOebLLx0fQzZ05CtsUfLZ6-h_BMeFhz',
+  '4_01':'1vqSYf-UWnOKBEeimMejcz9NoZUJG3MXj',
+  '4_02':'1vBgVKK-GlbgTu0PzDs7m_WlH7le7cpFF',
+  '5_01':'1hDng0AbrFfZNwpduNfzC-apj3ObptloX',
+  '5_02':'1YuljtBXpze2-R950v5BGCvRTBHamjRul',
+  '6_01':'1-uwC-cKzO9Vy2CufO2v_UqNJ1J6TWxr2',
+  '6_02':'1PSex2Osgol0ozQ6Rl0GtuVG3GgevqbKK',
+  '7_01':'1TIub3fbMcJY_CRriRlpm_JdswW0luuVO',
+  '7_02':'1jN7KSichOKTQ4CcIHkjF_MJrxskzZOPc',
+};
+
+// ── ズームパラメータ ──────────────────────────────────
+const ZOOM_PARAMS = {
+  student: {range:230, asp:0.85, disp:350},
+  teacher: {range:270, asp:1.2,  disp:360},
+};
+const IMG_W = 3024, IMG_H = 4032;
+
+// ── 座標データ（全313名） ─────────────────────────────
+const COORD_DATA = {
+  '1_01': [
+    {"id":"L01","name":"浅野大輔","x":332,"y":734,"type":"student"},
+    {"id":"L02","name":"芦川立身","x":332,"y":1200,"type":"student"},
+    {"id":"L03","name":"砥田憲幸","x":327,"y":1659,"type":"student"},
+    {"id":"L04","name":"池谷睦樹","x":312,"y":2133,"type":"student"},
+    {"id":"G11","name":"奥原元","x":892,"y":2627,"type":"student"},
+    {"id":"G12","name":"小黒俊之","x":1478,"y":2647,"type":"student"},
+    {"id":"G13","name":"加藤隆昭","x":2088,"y":2642,"type":"student"},
+    {"id":"G14","name":"佐藤惣右太","x":2713,"y":2642,"type":"student"},
+    {"id":"G21","name":"須賀健二郎","x":887,"y":3126,"type":"student"},
+    {"id":"G22","name":"鈴木治","x":1483,"y":3131,"type":"student"},
+    {"id":"G23","name":"高尾宜史","x":2103,"y":3167,"type":"student"},
+    {"id":"G24","name":"高島憲三","x":2738,"y":3146,"type":"student"},
+    {"id":"M102","name":"川村先生","x":1678,"y":366,"type":"teacher"},
+    {"id":"M103","name":"荻野谷先生","x":2288,"y":367,"type":"teacher"},
+    {"id":"M104","name":"伊藤正勝","x":309,"y":2628,"type":"student"},
+    {"id":"M105","name":"澤村文貴","x":299,"y":3112,"type":"student"}
+  ],
+  '1_02': [
+    {"id":"T11","name":"角田哲雄","x":322,"y":328,"type":"student"},
+    {"id":"T21","name":"内藤孝明","x":322,"y":758,"type":"student"},
+    {"id":"T31","name":"中村友亮","x":322,"y":1159,"type":"student"},
+    {"id":"T12","name":"時田剛","x":882,"y":278,"type":"student"},
+    {"id":"T22","name":"中川雅之","x":892,"y":728,"type":"student"},
+    {"id":"T32","name":"姫井健史","x":892,"y":1174,"type":"student"},
+    {"id":"B11","name":"前田和弘","x":322,"y":1626,"type":"student"},
+    {"id":"B21","name":"浅野かおり","x":317,"y":2090,"type":"student"},
+    {"id":"B31","name":"鈴木雅子","x":322,"y":2551,"type":"student"},
+    {"id":"B41","name":"南部美保","x":322,"y":3073,"type":"student"},
+    {"id":"B12","name":"松野裕彦","x":877,"y":1641,"type":"student"},
+    {"id":"B22","name":"大井直子","x":892,"y":2090,"type":"student"},
+    {"id":"B32","name":"高田あい","x":897,"y":2566,"type":"student"},
+    {"id":"B42","name":"原小鈴","x":887,"y":3073,"type":"student"},
+    {"id":"B13","name":"山口徹","x":1456,"y":1636,"type":"student"},
+    {"id":"B23","name":"大久保淳子","x":1446,"y":2095,"type":"student"},
+    {"id":"B33","name":"内藤みどり","x":1472,"y":2576,"type":"student"},
+    {"id":"B43","name":"松澤奈々","x":1477,"y":3063,"type":"student"},
+    {"id":"B14","name":"尹善弘","x":2017,"y":1626,"type":"student"},
+    {"id":"B24","name":"香川美枝子","x":2032,"y":2090,"type":"student"},
+    {"id":"B34","name":"中山精枝","x":2052,"y":2576,"type":"student"},
+    {"id":"B44","name":"脇本恵里子","x":2042,"y":3053,"type":"student"},
+    {"id":"B15","name":"滝沢稔","x":2602,"y":1616,"type":"student"},
+    {"id":"B25","name":"木崎原麗","x":2627,"y":2075,"type":"student"},
+    {"id":"B35","name":"鳴川暁子","x":2632,"y":2561,"type":"student"},
+    {"id":"B45","name":"和田優子","x":2647,"y":3043,"type":"student"}
+  ],
+  '2_01': [
+    {"id":"T_kono","name":"河野先生","x":1733,"y":497,"type":"teacher"},
+    {"id":"T_hano","name":"濱野先生","x":2364,"y":542,"type":"teacher"},
+    {"id":"L01","name":"赤倉優蔵","x":357,"y":1332,"type":"student"},
+    {"id":"L02","name":"安藤芳和","x":357,"y":1796,"type":"student"},
+    {"id":"L03","name":"石崎裕史","x":347,"y":2308,"type":"student"},
+    {"id":"G11","name":"大田原幸司","x":927,"y":2792,"type":"student"},
+    {"id":"G12","name":"笠原健太朗","x":1522,"y":2792,"type":"student"},
+    {"id":"G13","name":"金子浩三","x":2123,"y":2777,"type":"student"},
+    {"id":"G14","name":"北林大作","x":2738,"y":2807,"type":"student"},
+    {"id":"G21","name":"坂内大祐","x":932,"y":3258,"type":"student"},
+    {"id":"G22","name":"佐藤光一郎","x":1522,"y":3298,"type":"student"},
+    {"id":"G23","name":"猿山裕司","x":2128,"y":3318,"type":"student"},
+    {"id":"G24","name":"鈴木睦正","x":2758,"y":3313,"type":"student"},
+    {"id":"M301","name":"黒住徹","x":368,"y":3267,"type":"student"},
+    {"id":"M302","name":"岩崎滋","x":358,"y":2785,"type":"student"}
+  ],
+  '2_02': [
+    {"id":"T11","name":"染谷崇文","x":287,"y":307,"type":"student"},
+    {"id":"T21","name":"野口和徳","x":287,"y":782,"type":"student"},
+    {"id":"T31","name":"鈴木紀子","x":251,"y":3237,"type":"student"},
+    {"id":"T12","name":"平正一","x":922,"y":322,"type":"student"},
+    {"id":"T22","name":"日比徹","x":867,"y":762,"type":"student"},
+    {"id":"T32","name":"寺内佐知子","x":877,"y":3237,"type":"student"},
+    {"id":"B11","name":"百野秀臣","x":292,"y":1246,"type":"student"},
+    {"id":"B21","name":"古性基樹","x":282,"y":1741,"type":"student"},
+    {"id":"B31","name":"秋元千春","x":267,"y":2216,"type":"student"},
+    {"id":"B41","name":"海老原範栄","x":267,"y":2710,"type":"student"},
+    {"id":"B12","name":"藤井賢太郎","x":856,"y":1235,"type":"student"},
+    {"id":"B22","name":"保土田洋史","x":851,"y":1736,"type":"student"},
+    {"id":"B32","name":"新井美和","x":877,"y":2221,"type":"student"},
+    {"id":"B42","name":"岡田かおり","x":867,"y":2710,"type":"student"},
+    {"id":"B13","name":"茂木洋樹","x":1456,"y":1714,"type":"student"},
+    {"id":"B23","name":"粟野奈津子","x":1477,"y":2194,"type":"student"},
+    {"id":"B33","name":"金子加菜子","x":1467,"y":2710,"type":"student"},
+    {"id":"B43","name":"難波美恵","x":1472,"y":3219,"type":"student"},
+    {"id":"B14","name":"望月達也","x":2052,"y":1704,"type":"student"},
+    {"id":"B24","name":"飯島貴子","x":2068,"y":2214,"type":"student"},
+    {"id":"B34","name":"金恵順","x":2052,"y":2725,"type":"student"},
+    {"id":"B44","name":"橋場弥生","x":2063,"y":3234,"type":"student"},
+    {"id":"B15","name":"若林将史","x":2637,"y":1704,"type":"student"},
+    {"id":"B25","name":"伊藤有紀","x":2668,"y":2204,"type":"student"},
+    {"id":"B35","name":"斉藤百子","x":2663,"y":2715,"type":"student"},
+    {"id":"B45","name":"山中純子","x":2668,"y":3229,"type":"student"}
+  ],
+  '3_01': [
+    {"id":"T_suzuki","name":"鈴木先生","x":2009,"y":355,"type":"teacher"},
+    {"id":"L01","name":"岩満憲嗣","x":322,"y":759,"type":"student"},
+    {"id":"L02","name":"梅田信一郎","x":322,"y":1262,"type":"student"},
+    {"id":"L03","name":"太田光洋人","x":322,"y":1722,"type":"student"},
+    {"id":"L04","name":"小川正昌彦","x":322,"y":2238,"type":"student"},
+    {"id":"G11","name":"兼子正樹","x":922,"y":2670,"type":"student"},
+    {"id":"G12","name":"亀田和彦","x":1522,"y":2670,"type":"student"},
+    {"id":"G13","name":"北城裕照","x":2123,"y":2670,"type":"student"},
+    {"id":"G14","name":"小暮義雄","x":2723,"y":2670,"type":"student"},
+    {"id":"G21","name":"坂上毅","x":917,"y":3148,"type":"student"},
+    {"id":"G22","name":"佐藤智哉","x":1517,"y":3148,"type":"student"},
+    {"id":"G23","name":"鈴木久志","x":2123,"y":3153,"type":"student"},
+    {"id":"G24","name":"高野成治","x":2738,"y":3163,"type":"student"},
+    {"id":"M500","name":"小用功","x":343,"y":3160,"type":"student"},
+    {"id":"M501","name":"奥田昌彦","x":327,"y":2646,"type":"student"}
+  ],
+  '3_02': [
+    {"id":"T11","name":"田崎義章","x":342,"y":340,"type":"student"},
+    {"id":"T21","name":"田中旦","x":322,"y":809,"type":"student"},
+    {"id":"T12","name":"舘脇正充","x":917,"y":345,"type":"student"},
+    {"id":"B31","name":"北川友子","x":322,"y":2654,"type":"student"},
+    {"id":"B41","name":"蓮沼優美","x":307,"y":3197,"type":"student"},
+    {"id":"B43","name":"本田久美子","x":1507,"y":3167,"type":"student"},
+    {"id":"B14","name":"矢嶋信之","x":2037,"y":1705,"type":"student"},
+    {"id":"B24","name":"大野葉子","x":2052,"y":2175,"type":"student"},
+    {"id":"B34","name":"野口知子","x":2068,"y":2669,"type":"student"},
+    {"id":"B44","name":"宮下幸子","x":2088,"y":3157,"type":"student"},
+    {"id":"B15","name":"飯村ふみ枝","x":2612,"y":1715,"type":"student"},
+    {"id":"B25","name":"岡田雅子","x":2657,"y":2185,"type":"student"},
+    {"id":"B35","name":"荻原恵美子","x":2657,"y":2669,"type":"student"},
+    {"id":"B45","name":"山口潤子","x":2688,"y":3162,"type":"student"},
+    {"id":"M700","name":"宮寺三太","x":348,"y":1724,"type":"student"},
+    {"id":"M701","name":"石川ルリ子","x":323,"y":2202,"type":"student"},
+    {"id":"M702","name":"夜久直二","x":1487,"y":1716,"type":"student"},
+    {"id":"M703","name":"上野水穂","x":1497,"y":2180,"type":"student"},
+    {"id":"M704","name":"七森愛","x":1512,"y":2674,"type":"student"},
+    {"id":"M705","name":"幡場ゆかり","x":907,"y":3177,"type":"student"},
+    {"id":"M706","name":"斉藤美穂","x":917,"y":2658,"type":"student"},
+    {"id":"M707","name":"稲垣実子","x":916,"y":2188,"type":"student"},
+    {"id":"M708","name":"目黒大介","x":921,"y":1724,"type":"student"},
+    {"id":"M709","name":"船田丈博","x":353,"y":1220,"type":"student"},
+    {"id":"M710","name":"冨田和裕","x":922,"y":776,"type":"student"},
+    {"id":"M711","name":"堀川範人","x":907,"y":1226,"type":"student"}
+  ],
+  '4_01': [
+    {"id":"T_takahashi","name":"高橋先生","x":1703,"y":547,"type":"teacher"},
+    {"id":"T_okuyama","name":"奥山先生","x":2328,"y":557,"type":"teacher"},
+    {"id":"L01","name":"飯野雅弘","x":382,"y":1326,"type":"student"},
+    {"id":"L02","name":"大須賀泰三","x":382,"y":1799,"type":"student"},
+    {"id":"L03","name":"小川正洋","x":367,"y":2252,"type":"student"},
+    {"id":"L04","name":"小野陽崇","x":367,"y":2721,"type":"student"},
+    {"id":"G11","name":"角田光崇","x":932,"y":2738,"type":"student"},
+    {"id":"G12","name":"木村定由","x":1512,"y":2728,"type":"student"},
+    {"id":"G13","name":"工藤元樹","x":2083,"y":2743,"type":"student"},
+    {"id":"G14","name":"古室寛","x":2683,"y":2748,"type":"student"},
+    {"id":"G21","name":"征矢一浩","x":927,"y":3217,"type":"student"},
+    {"id":"G22","name":"高橋秀明","x":1512,"y":3212,"type":"student"},
+    {"id":"G23","name":"高松敏雄","x":2103,"y":3232,"type":"student"},
+    {"id":"G24","name":"永田淳一","x":2698,"y":3247,"type":"student"},
+    {"id":"M800","name":"佐藤哲郎","x":373,"y":3195,"type":"student"}
+  ],
+  '4_02': [
+    {"id":"T11","name":"中丸聡","x":251,"y":313,"type":"student"},
+    {"id":"T21","name":"牧野隆昭","x":251,"y":778,"type":"student"},
+    {"id":"T31","name":"宮澤健太郎","x":322,"y":1174,"type":"student"},
+    {"id":"T12","name":"朴宙源","x":786,"y":237,"type":"student"},
+    {"id":"T32","name":"森純一","x":922,"y":1174,"type":"student"},
+    {"id":"B21","name":"荒川則子","x":251,"y":2155,"type":"student"},
+    {"id":"B31","name":"香椎真弓","x":236,"y":2636,"type":"student"},
+    {"id":"B41","name":"志田実希子","x":236,"y":3148,"type":"student"},
+    {"id":"B12","name":"山口剛嗣","x":816,"y":1679,"type":"student"},
+    {"id":"B22","name":"石井多恵子","x":826,"y":2155,"type":"student"},
+    {"id":"B32","name":"久門佐枝子","x":821,"y":2631,"type":"student"},
+    {"id":"B42","name":"中澤和子","x":826,"y":3138,"type":"student"},
+    {"id":"B13","name":"山田能之","x":1396,"y":1669,"type":"student"},
+    {"id":"B23","name":"砥井英恵","x":1421,"y":2145,"type":"student"},
+    {"id":"B33","name":"顧夏恵","x":1421,"y":2631,"type":"student"},
+    {"id":"B43","name":"中村妙","x":1416,"y":3128,"type":"student"},
+    {"id":"B14","name":"山本武秀","x":1947,"y":1669,"type":"student"},
+    {"id":"B24","name":"江幡由紀子","x":1957,"y":2140,"type":"student"},
+    {"id":"B34","name":"小宮静香","x":1977,"y":2626,"type":"student"},
+    {"id":"B44","name":"松浦千恵","x":1997,"y":3118,"type":"student"},
+    {"id":"B15","name":"吉野正人","x":2557,"y":1659,"type":"student"},
+    {"id":"B25","name":"遠藤麻美子","x":2572,"y":2130,"type":"student"},
+    {"id":"B35","name":"桜井美加","x":2577,"y":2626,"type":"student"},
+    {"id":"B45","name":"道畑まり子","x":2607,"y":3128,"type":"student"},
+    {"id":"M900","name":"馬渕圭","x":806,"y":725,"type":"student"},
+    {"id":"M902","name":"森田知宏","x":242,"y":1684,"type":"student"}
+  ],
+  '5_01': [
+    {"id":"T_enokido","name":"榎戸先生","x":1718,"y":471,"type":"teacher"},
+    {"id":"T_eguchi","name":"江口先生","x":2328,"y":486,"type":"teacher"},
+    {"id":"L01","name":"青龍太郎","x":357,"y":812,"type":"student"},
+    {"id":"L02","name":"阿久津裕二","x":352,"y":1268,"type":"student"},
+    {"id":"L03","name":"石井康義","x":337,"y":1750,"type":"student"},
+    {"id":"L04","name":"大山元博","x":337,"y":2216,"type":"student"},
+    {"id":"G11","name":"金子孝","x":912,"y":2717,"type":"student"},
+    {"id":"G12","name":"川田哲義","x":1482,"y":2717,"type":"student"},
+    {"id":"G13","name":"北島茂憲","x":2093,"y":2737,"type":"student"},
+    {"id":"G14","name":"久保田了司","x":2688,"y":2757,"type":"student"},
+    {"id":"G21","name":"杉山茂生","x":897,"y":3207,"type":"student"},
+    {"id":"G22","name":"鈴木聡史","x":1482,"y":3232,"type":"student"},
+    {"id":"G23","name":"高田昇一郎","x":2093,"y":3247,"type":"student"},
+    {"id":"G24","name":"高津知弘","x":2708,"y":3267,"type":"student"},
+    {"id":"M1000","name":"岡野竜介","x":323,"y":2691,"type":"student"},
+    {"id":"M1001","name":"倉澤茂伸","x":318,"y":3185,"type":"student"}
+  ],
+  '5_02': [
+    {"id":"T11","name":"高橋雅也","x":322,"y":275,"type":"student"},
+    {"id":"T21","name":"樋代将郎","x":312,"y":748,"type":"student"},
+    {"id":"T31","name":"三島潤","x":312,"y":1220,"type":"student"},
+    {"id":"T12","name":"花井良","x":892,"y":259,"type":"student"},
+    {"id":"T22","name":"松浦新治","x":897,"y":738,"type":"student"},
+    {"id":"T32","name":"森永英司","x":897,"y":1215,"type":"student"},
+    {"id":"B11","name":"柳澤圭太","x":302,"y":1697,"type":"student"},
+    {"id":"B21","name":"石川夏織","x":302,"y":2161,"type":"student"},
+    {"id":"B31","name":"佐野博子","x":302,"y":2695,"type":"student"},
+    {"id":"B41","name":"松永陽子","x":297,"y":3224,"type":"student"},
+    {"id":"B12","name":"山柴悟","x":912,"y":1692,"type":"student"},
+    {"id":"B22","name":"一色理惠","x":892,"y":2181,"type":"student"},
+    {"id":"B32","name":"高田知子","x":917,"y":2695,"type":"student"},
+    {"id":"B42","name":"水落孝子","x":907,"y":3199,"type":"student"},
+    {"id":"B13","name":"山田真久","x":1482,"y":1682,"type":"student"},
+    {"id":"B23","name":"遠藤寛子","x":1497,"y":2171,"type":"student"},
+    {"id":"B33","name":"谷口羽衣子","x":1522,"y":2670,"type":"student"},
+    {"id":"B43","name":"向井聡子","x":1522,"y":3174,"type":"student"},
+    {"id":"B14","name":"領家伸佳","x":2063,"y":1687,"type":"student"},
+    {"id":"B24","name":"唐木麻也子","x":2083,"y":2166,"type":"student"},
+    {"id":"B34","name":"種井奈都子","x":2103,"y":2665,"type":"student"},
+    {"id":"B44","name":"村田友紀子","x":2123,"y":3174,"type":"student"},
+    {"id":"B15","name":"涌井一之","x":2668,"y":1687,"type":"student"},
+    {"id":"B25","name":"佐藤直子","x":2678,"y":2161,"type":"student"},
+    {"id":"B35","name":"遠山小百合","x":2723,"y":2670,"type":"student"},
+    {"id":"B45","name":"鷲尾美枝","x":2723,"y":3174,"type":"student"}
+  ],
+  '6_01': [
+    {"id":"T_tokunaga","name":"徳永先生","x":1819,"y":471,"type":"teacher"},
+    {"id":"T_satomi","name":"里見先生","x":2399,"y":446,"type":"teacher"},
+    {"id":"L01","name":"新井偵一","x":468,"y":767,"type":"student"},
+    {"id":"L02","name":"有馬祐輔","x":448,"y":1250,"type":"student"},
+    {"id":"L03","name":"石上敦人","x":448,"y":1676,"type":"student"},
+    {"id":"L04","name":"乾耕三","x":423,"y":2140,"type":"student"},
+    {"id":"G11","name":"大久保偵吾","x":988,"y":2631,"type":"student"},
+    {"id":"G12","name":"落合健二","x":1557,"y":2641,"type":"student"},
+    {"id":"G13","name":"木下雅史","x":2153,"y":2666,"type":"student"},
+    {"id":"G14","name":"越渕友基","x":2738,"y":2682,"type":"student"},
+    {"id":"G21","name":"定谷忠大","x":967,"y":3105,"type":"student"},
+    {"id":"G22","name":"佐藤武徳","x":1552,"y":3135,"type":"student"},
+    {"id":"G23","name":"洲崎大二","x":2143,"y":3166,"type":"student"},
+    {"id":"G24","name":"鈴木衛","x":2738,"y":3196,"type":"student"},
+    {"id":"M1200","name":"岩崎研一朗","x":413,"y":2624,"type":"student"},
+    {"id":"M1201","name":"佐久間康幸","x":388,"y":3103,"type":"student"}
+  ],
+  '6_02': [
+    {"id":"T11","name":"高野宏一","x":372,"y":293,"type":"student"},
+    {"id":"T21","name":"外ノ池祐太","x":362,"y":759,"type":"student"},
+    {"id":"T31","name":"林功","x":362,"y":1240,"type":"student"},
+    {"id":"T12","name":"田村憲太郎","x":972,"y":283,"type":"student"},
+    {"id":"T22","name":"中澤暁","x":967,"y":744,"type":"student"},
+    {"id":"T32","name":"平林岳治","x":952,"y":1255,"type":"student"},
+    {"id":"B11","name":"松岡秀健","x":362,"y":1720,"type":"student"},
+    {"id":"B21","name":"飯野貴子","x":357,"y":2202,"type":"student"},
+    {"id":"B31","name":"田村奈津江","x":352,"y":2705,"type":"student"},
+    {"id":"B41","name":"増山明子","x":347,"y":3217,"type":"student"},
+    {"id":"B12","name":"室川泰斗","x":962,"y":1710,"type":"student"},
+    {"id":"B22","name":"今堀さやか","x":957,"y":2192,"type":"student"},
+    {"id":"B32","name":"中城美奈","x":967,"y":2695,"type":"student"},
+    {"id":"B42","name":"村越一美","x":952,"y":3212,"type":"student"},
+    {"id":"B13","name":"望月勤也","x":1542,"y":1710,"type":"student"},
+    {"id":"B23","name":"大室真由美","x":1552,"y":2202,"type":"student"},
+    {"id":"B33","name":"長沼綾","x":1547,"y":2685,"type":"student"},
+    {"id":"B43","name":"山中理津子","x":1522,"y":3187,"type":"student"},
+    {"id":"B14","name":"吉越一士","x":2138,"y":1730,"type":"student"},
+    {"id":"B24","name":"北原雅子","x":2123,"y":2172,"type":"student"},
+    {"id":"B34","name":"東川奈美","x":2123,"y":2685,"type":"student"},
+    {"id":"B44","name":"山本浩代","x":2158,"y":3197,"type":"student"},
+    {"id":"B15","name":"和栗富貴","x":2723,"y":1690,"type":"student"},
+    {"id":"B25","name":"菅澤美佐子","x":2723,"y":2172,"type":"student"},
+    {"id":"B35","name":"堀川良江","x":2723,"y":2685,"type":"student"},
+    {"id":"B45","name":"横森孝子","x":2723,"y":3187,"type":"student"}
+  ],
+  '7_01': [
+    {"id":"T_okuma","name":"大熊先生","x":2090,"y":476,"type":"teacher"},
+    {"id":"L01","name":"新井一臣","x":393,"y":1295,"type":"student"},
+    {"id":"L02","name":"荒川政喜","x":382,"y":1768,"type":"student"},
+    {"id":"G11","name":"磯部圭司","x":982,"y":2723,"type":"student"},
+    {"id":"G12","name":"伊東洋","x":1562,"y":2698,"type":"student"},
+    {"id":"G13","name":"大湯孝寛","x":2168,"y":2703,"type":"student"},
+    {"id":"G14","name":"萱垣伸","x":2773,"y":2698,"type":"student"},
+    {"id":"G21","name":"桐山大和","x":982,"y":3211,"type":"student"},
+    {"id":"G22","name":"桐生俊士","x":1562,"y":3196,"type":"student"},
+    {"id":"G23","name":"国弘一成","x":2183,"y":3206,"type":"student"},
+    {"id":"G24","name":"芝原大聡","x":2783,"y":3231,"type":"student"},
+    {"id":"M1400","name":"池田貴央","x":383,"y":2223,"type":"student"},
+    {"id":"M1401","name":"井瀬和男","x":408,"y":2742,"type":"student"},
+    {"id":"M1402","name":"川名雅之","x":393,"y":3210,"type":"student"}
+  ],
+  '7_02': [
+    {"id":"T11","name":"島崎大輔","x":327,"y":268,"type":"student"},
+    {"id":"T21","name":"竹内玄","x":312,"y":733,"type":"student"},
+    {"id":"T31","name":"田幡茂","x":302,"y":1192,"type":"student"},
+    {"id":"T12","name":"高野聡史","x":897,"y":268,"type":"student"},
+    {"id":"T22","name":"田中隆博","x":892,"y":723,"type":"student"},
+    {"id":"T32","name":"鶴岡徹也","x":877,"y":1182,"type":"student"},
+    {"id":"B11","name":"伴井高明","x":292,"y":1646,"type":"student"},
+    {"id":"B21","name":"井口恵美子","x":277,"y":2141,"type":"student"},
+    {"id":"B31","name":"櫻内由規","x":277,"y":2671,"type":"student"},
+    {"id":"B41","name":"松井由美子","x":272,"y":3181,"type":"student"},
+    {"id":"B12","name":"二宮伸夫","x":887,"y":1646,"type":"student"},
+    {"id":"B22","name":"小野寛子","x":892,"y":2131,"type":"student"},
+    {"id":"B32","name":"神保ルミ","x":877,"y":2626,"type":"student"},
+    {"id":"B42","name":"水野友紀","x":882,"y":3176,"type":"student"},
+    {"id":"B13","name":"人見太虎","x":1477,"y":1656,"type":"student"},
+    {"id":"B23","name":"柿原眞里絵","x":1522,"y":2101,"type":"student"},
+    {"id":"B33","name":"高橋雅美","x":1517,"y":2616,"type":"student"},
+    {"id":"B43","name":"向原文子","x":1477,"y":3146,"type":"student"},
+    {"id":"B14","name":"松苗勝男","x":2012,"y":1651,"type":"student"},
+    {"id":"B24","name":"金子智絵","x":2047,"y":2131,"type":"student"},
+    {"id":"B34","name":"田中瑞紀","x":2078,"y":2611,"type":"student"},
+    {"id":"B44","name":"村越理江","x":2093,"y":3131,"type":"student"},
+    {"id":"B15","name":"宮城義一","x":2612,"y":1646,"type":"student"},
+    {"id":"B25","name":"齋藤美和","x":2642,"y":2116,"type":"student"},
+    {"id":"B35","name":"中山明子","x":2673,"y":2616,"type":"student"},
+    {"id":"B45","name":"渡邊千穂","x":2693,"y":3126,"type":"student"}
+  ]
+};
+
+// ── 状態 ─────────────────────────────────────────────
+let currentClassNum = null; // 現在表示中のクラス番号(1-7)
+let scanImgCache = {}; // {pageKey: dataURL}
+let scanImgLoading = {}; // {pageKey: Promise}
+
+// ── ズーム計算 ─────────────────────────────────────────
+function calcZoomCSS(point) {
+  const pr = ZOOM_PARAMS[point.type];
+  const r = pr.range, a = pr.asp, disp = pr.disp;
+  const cx = point.x, cy = point.y;
+  const sx = Math.max(0, cx - r);
+  const sy = Math.max(0, cy - Math.round(r * a));
+  const sw = Math.min(r * 2, IMG_W - sx);
+  const sh = Math.min(Math.round(r * 2 * a), IMG_H - sy);
+  const dispH = Math.round(disp * a);
+  const scaleX = disp / sw;
+  const scaleY = dispH / sh;
+  const bgW = Math.round(IMG_W * scaleX);
+  const bgH = Math.round(IMG_H * scaleY);
+  const bgX = -Math.round(sx * scaleX);
+  const bgY = -Math.round(sy * scaleY);
+  return { w: disp, h: dispH, bgW, bgH, bgX, bgY };
 }
-function renderViewGrid(){
-  const grid=$('viewGrid');
-  const list=getViewFiltered();
-  grid.innerHTML='';
-  if(!list.length){
-    grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-ic">🎓</div><div class="empty-t">写真がありません</div><div style="font-size:.8rem">幹事が写真を追加するとここに表示されます</div></div>`;
-    return;
-  }
-  list.forEach((p,i)=>{
-    const src=p.edited||p.url||'';
-    const card=document.createElement('div');
-    card.className='photo-card';
-    card.style.animationDelay=`${Math.min(i,.15)*.04}s`;
-    card.innerHTML=`
-      <div class="img-wrap">
-        ${src?`<img src="${src}" alt="${p.name||''}" loading="lazy">`:`<div class="ph"><span style="font-size:1.5rem">📷</span><span>読込中</span></div>`}
-        <div class="type-badge">${p.type==='current'?'🙂 現在':'📚 当時'}</div>
-      </div>
-      <div class="card-info">
-        <div class="c-name">${p.name||'（未登録）'}</div>
-        <div class="c-nick">${p.nick?'「'+p.nick+'」':''}</div>
-        <div class="c-cmt">${p.cmt||''}</div>
+
+// ── 画像ロード（Drive） ───────────────────────────────
+async function loadScanImg(pageKey) {
+  if (scanImgCache[pageKey]) return scanImgCache[pageKey];
+  if (scanImgLoading[pageKey]) return scanImgLoading[pageKey];
+  const fileId = SCAN_FILE_IDS[pageKey];
+  if (!fileId) return null;
+  if (!accessToken) return null;
+  scanImgLoading[pageKey] = dlDataUrl(fileId).then(url => {
+    scanImgCache[pageKey] = url;
+    delete scanImgLoading[pageKey];
+    return url;
+  }).catch(() => null);
+  return scanImgLoading[pageKey];
+}
+
+// ── トップビュー：クラスカード描画 ───────────────────
+function renderClassGrid() {
+  const grid = $('classGrid');
+  grid.innerHTML = '';
+  for (let i = 1; i <= 7; i++) {
+    const card = document.createElement('div');
+    card.className = 'class-card';
+    card.innerHTML = `
+      <div class="class-card-placeholder" id="classThumb${i}">📷</div>
+      <div class="class-card-label">
+        <div class="class-card-name">3年${i}組</div>
+        <div class="class-card-sub">${countStudents(i)}名</div>
       </div>`;
-    card.onclick=()=>openDetail(p.id);
+    card.onclick = () => openClassView(i);
     grid.appendChild(card);
+    // サムネイル非同期ロード
+    loadScanImg(i + '_01').then(url => {
+      if (!url) return;
+      const thumb = $('classThumb' + i);
+      if (!thumb) return;
+      const img = document.createElement('img');
+      img.className = 'class-card-thumb';
+      img.src = url;
+      thumb.replaceWith(img);
+    });
+  }
+}
+
+function countStudents(classNum) {
+  const k01 = classNum + '_01';
+  const k02 = classNum + '_02';
+  const c01 = (COORD_DATA[k01] || []).length;
+  const c02 = (COORD_DATA[k02] || []).length;
+  return c01 + c02;
+}
+
+// ── 全クラス検索 ──────────────────────────────────────
+$('viewSearch').oninput = function() {
+  const q = this.value.trim();
+  if (!q) return;
+  // 全クラスから検索
+  for (let i = 1; i <= 7; i++) {
+    for (const page of ['01', '02']) {
+      const key = i + '_' + page;
+      const pts = COORD_DATA[key] || [];
+      const hit = pts.find(p => p.name.includes(q));
+      if (hit) {
+        openClassView(i, q, hit);
+        return;
+      }
+    }
+  }
+  showToast('見つかりませんでした: ' + q);
+};
+
+// ── クラスビューを開く ────────────────────────────────
+async function openClassView(classNum, searchQuery, hitPoint) {
+  currentClassNum = classNum;
+  $('topView').style.display = 'none';
+  $('classView').style.display = 'block';
+  $('viewNav').classList.add('on');
+  $('classViewTitle').textContent = '3年' + classNum + '組';
+  $('classSearch').value = searchQuery || '';
+
+  const wrap = $('classImagesWrap');
+  wrap.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--faded);">画像を読み込み中...</div>';
+
+  // 2ページ分の画像を順番に描画
+  wrap.innerHTML = '';
+  for (const page of ['01', '02']) {
+    const key = classNum + '_' + page;
+    const fileId = SCAN_FILE_IDS[key];
+    if (!fileId) continue;
+
+    // 画像ラッパー
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'class-page-img-wrap';
+    imgWrap.id = 'pageWrap_' + key;
+    imgWrap.style.position = 'relative';
+
+    const placeholder = document.createElement('div');
+    placeholder.style.cssText = 'width:100%;aspect-ratio:3/4;background:#2a1f0e;display:flex;align-items:center;justify-content:center;color:var(--faded);font-size:.8rem;';
+    placeholder.textContent = '読み込み中...';
+    imgWrap.appendChild(placeholder);
+
+    const label = document.createElement('div');
+    label.className = 'class-page-label';
+    label.textContent = page === '01' ? '前のページ' : '後のページ';
+
+    wrap.appendChild(imgWrap);
+    wrap.appendChild(label);
+
+    // 非同期で画像ロード
+    loadScanImg(key).then(url => {
+      if (!url) { placeholder.textContent = '画像の読み込みに失敗しました'; return; }
+      const img = document.createElement('img');
+      img.className = 'class-page-img';
+      img.src = url;
+      img.dataset.key = key;
+      imgWrap.innerHTML = '';
+      imgWrap.appendChild(img);
+
+      // 名前タップイベントを設置
+      setupNameTaps(imgWrap, img, key);
+
+      // 検索ヒットがあれば自動ズーム
+      if (hitPoint && key === classNum + '_' + (hitPoint ? '01' : '02')) {
+        // ヒットしたページに対してズーム
+      }
+    });
+  }
+
+  // 検索クエリがある場合、ヒット者を自動ズーム
+  if (hitPoint) {
+    setTimeout(() => openZoom(hitPoint, classNum + '_01'), 800);
+  }
+}
+
+// ── 名前タップのオーバーレイ設置 ─────────────────────
+function setupNameTaps(wrap, img, key) {
+  const pts = COORD_DATA[key] || [];
+  pts.forEach(p => {
+    const tap = document.createElement('div');
+    tap.style.cssText = 'position:absolute;cursor:pointer;-webkit-tap-highlight-color:transparent;';
+    // 座標を画像表示サイズに変換（画像ロード後）
+    const updatePos = () => {
+      const scaleX = img.clientWidth / IMG_W;
+      const scaleY = img.clientHeight / IMG_H;
+      const tapSize = 60;
+      tap.style.left = Math.round(p.x * scaleX - tapSize / 2) + 'px';
+      tap.style.top = Math.round(p.y * scaleY - tapSize / 2) + 'px';
+      tap.style.width = tapSize + 'px';
+      tap.style.height = tapSize + 'px';
+    };
+    if (img.complete) updatePos();
+    else img.onload = updatePos;
+    tap.onclick = (e) => { e.stopPropagation(); openZoom(p, key); };
+    wrap.appendChild(tap);
   });
 }
 
-// タブ
-$('viewTabs').querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
-  $('viewTabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
-  t.classList.add('on');
-  currentFilter=t.dataset.filter;
-  renderViewGrid();
-});
-$('viewSearch').oninput=()=>renderViewGrid();
-
-// 写真詳細
-function openDetail(id){
-  viewingId=id;
-  const p=photos.find(x=>String(x.id)===String(id));if(!p)return;
-  $('detailImg').src=p.edited||p.url||'';
-  $('detailTitle').textContent=p.name||'（未登録）';
-  $('detailName').textContent=p.name||'（未登録）';
-  $('detailNick').textContent=p.nick?`あだ名：「${p.nick}」`:'';
-  $('detailClass').textContent=p.cls?`${p.cls}　${p.type==='current'?'🙂 現在の写真':'📚 卒業当時'}`:p.type==='current'?'🙂 現在の写真':'📚 卒業当時';
-  if(p.cmt){$('detailCmt').textContent=p.cmt;$('detailCmtArea').style.display='';}
-  else $('detailCmtArea').style.display='none';
-  $('myCmtInput').value=comments[id]||'';
-  $('detailModal').classList.add('on');
-}
-[$('detailClose'),$('detailClose2')].forEach(b=>b.onclick=()=>$('detailModal').classList.remove('on'));
-$('detailModal').onclick=e=>{if(e.target===$('detailModal'))$('detailModal').classList.remove('on');};
-$('saveMyCmt').onclick=()=>{
-  if(!viewingId)return;
-  comments[viewingId]=$('myCmtInput').value.trim();
-  saveComments(comments);
-  $('detailModal').classList.remove('on');
-  showToast('コメントを保存しました');
+// ── クラスビュー内検索 ────────────────────────────────
+$('classSearch').oninput = function() {
+  const q = this.value.trim();
+  if (!q || !currentClassNum) return;
+  for (const page of ['01', '02']) {
+    const key = currentClassNum + '_' + page;
+    const pts = COORD_DATA[key] || [];
+    const hit = pts.find(p => p.name.includes(q));
+    if (hit) {
+      openZoom(hit, key);
+      return;
+    }
+  }
+  showToast('このクラスには見つかりませんでした: ' + q);
 };
 
-// ── スライドショー ─────────────────────────────────────
-$('navSlide').onclick=startSS;
-function showSlide(idx){
-  const l=getViewFiltered();if(!l.length)return;
-  ssIdx=(idx+l.length)%l.length;
-  const p=l[ssIdx];
-  $('ssImg').src=p.edited||p.url||'';
-  $('ssName').textContent=p.name||'（未登録）';
-  $('ssNick').textContent=p.nick?`「${p.nick}」`:'';
-  $('ssCmt').textContent=p.cmt||comments[p.id]||'';
-  $('ssCnt').textContent=`${ssIdx+1} / ${l.length}`;
+// ── 戻るボタン ────────────────────────────────────────
+$('classBackBtn').onclick = () => {
+  $('classView').style.display = 'none';
+  $('topView').style.display = 'block';
+  $('classSearch').value = '';
+  currentClassNum = null;
+};
+
+// ── ズームを開く ──────────────────────────────────────
+function openZoom(point, pageKey) {
+  const css = calcZoomCSS(point);
+  const imgUrl = scanImgCache[pageKey];
+  if (!imgUrl) {
+    showToast('画像を読み込み中です。少しお待ちください。');
+    return;
+  }
+  const box = $('zoomImgBox');
+  box.style.width = css.w + 'px';
+  box.style.height = css.h + 'px';
+  box.style.backgroundImage = 'url(' + imgUrl + ')';
+  box.style.backgroundSize = css.bgW + 'px ' + css.bgH + 'px';
+  box.style.backgroundPosition = css.bgX + 'px ' + css.bgY + 'px';
+
+  // アニメーションリセット
+  const card = document.querySelector('.zoom-card');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = '';
+
+  const pn = $('zoomPname');
+  pn.textContent = point.name;
+  pn.className = 'zoom-pname ' + (point.type === 'teacher' ? 't' : 's');
+  $('zoomPtype').textContent = point.type === 'teacher' ? '先生' : '生徒';
+  $('zoomOv').classList.add('open');
 }
-function startSS(){
-  const l=getViewFiltered();if(!l.length){alert('写真がありません');return;}
-  $('ss').classList.add('on');ssPaused=false;showSlide(0);
-  ssTimer=setInterval(()=>{if(!ssPaused)showSlide(ssIdx+1);},3500);
+
+$('zoomOv').onclick = () => $('zoomOv').classList.remove('open');
+
+// ── 閲覧画面初期化 ───────────────────────────────────
+function initViewScreen() {
+  $('viewSchoolLabel').textContent = config ? config.schoolName + ' ' + config.year : '';
+  renderClassGrid();
+  // Drive接続済みなら自動でサムネ読み込み開始
+  if (accessToken) {
+    // サムネイルは renderClassGrid 内で非同期ロードされる
+  }
 }
-function stopSS(){$('ss').classList.remove('on');clearInterval(ssTimer);}
-$('ssClose').onclick=stopSS;
-$('ssPrev').onclick=()=>{ssPaused=true;showSlide(ssIdx-1);};
-$('ssNext').onclick=()=>{ssPaused=true;showSlide(ssIdx+1);};
-$('ssPause').onclick=()=>{ssPaused=!ssPaused;$('ssPause').textContent=ssPaused?'▶':'⏸';};
-// スワイプ
-$('ss').addEventListener('touchstart',e=>{swipeX=e.touches[0].clientX;},{passive:true});
-$('ss').addEventListener('touchend',e=>{
-  if(swipeX===null)return;
-  const dx=e.changedTouches[0].clientX-swipeX;
-  if(Math.abs(dx)>50){ssPaused=true;showSlide(ssIdx+(dx<0?1:-1));}
-  swipeX=null;
-},{passive:true});
 
 // 閲覧メニュー
-$('navViewMenu').onclick=()=>{$('viewMenuBg').classList.add('on');$('viewMenuSheet').style.display='block';};
-$('viewMenuBg').onclick=()=>{$('viewMenuBg').classList.remove('on');$('viewMenuSheet').style.display='none';};
-$('mToAdmin').onclick=()=>{
-  $('viewMenuBg').classList.remove('on');$('viewMenuSheet').style.display='none';
-  showScreen('pwScreen');$('pwSchoolName').textContent=`${config.schoolName} ${config.year}`;
+[$('navViewMenuBtn'), $('navViewMenuBtn2')].forEach(btn => {
+  if (btn) btn.onclick = () => {
+    $('viewMenuBg').classList.add('on');
+    $('viewMenuSheet').style.display = 'block';
+  };
+});
+$('viewMenuBg').onclick = () => { $('viewMenuBg').classList.remove('on'); $('viewMenuSheet').style.display = 'none'; };
+$('mToAdmin').onclick = () => {
+  $('viewMenuBg').classList.remove('on'); $('viewMenuSheet').style.display = 'none';
+  showScreen('pwScreen'); $('pwSchoolName').textContent = config ? config.schoolName + ' ' + config.year : '';
 };
-$('mSetupReset').onclick=()=>{
-  if(confirm('初期設定をやり直しますか？（データは削除されません）')){
-    localStorage.removeItem(SKEY_CONFIG);config=null;
-    $('viewMenuBg').classList.remove('on');$('viewMenuSheet').style.display='none';
+$('mSetupReset').onclick = () => {
+  if (confirm('初期設定をやり直しますか？')) {
+    localStorage.removeItem(SKEY_CONFIG); config = null;
+    $('viewMenuBg').classList.remove('on'); $('viewMenuSheet').style.display = 'none';
     showScreen('setupScreen');
   }
 };
+
 
 // ════════════════════════════════════════════════════════
 // 管理画面
