@@ -24,16 +24,20 @@
   --safe-b:env(safe-area-inset-bottom);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overscroll-behavior:none;}
-body{background:var(--bg);font-family:'Noto Serif JP',serif;color:var(--ink);position:fixed;width:100%;overflow:hidden;}
+html{height:100%;}body{min-height:100%;}
+body{background:var(--bg);font-family:'Noto Serif JP',serif;color:var(--ink);}
 
 /* ══════════════════════════════════════
    共通ユーティリティ
 ══════════════════════════════════════ */
-.screen{position:fixed;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;pointer-events:none;}
-.screen.on{display:block;pointer-events:auto;}
-#setupScreen.on{display:flex;pointer-events:auto;}
-#pwScreen.on{display:flex;pointer-events:auto;}
+.screen{display:none;}
+.screen.on{display:block;}
+#setupScreen{min-height:100vh;}
+#setupScreen.on{display:flex;}
+#pwScreen{min-height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+#pwScreen.on{display:flex;}
+#viewScreen.on{display:block;min-height:100vh;}
+#adminScreen.on{display:block;min-height:100vh;}
 .btn{background:transparent;border:1px solid rgba(201,168,76,.4);border-radius:8px;color:var(--gold-l);font-family:'Noto Serif JP',serif;font-size:.85rem;padding:.55rem 1rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
 .btn:active{background:rgba(201,168,76,.15);}
 .btn.prim{background:var(--gold);border-color:var(--gold);color:var(--bg);font-weight:600;}
