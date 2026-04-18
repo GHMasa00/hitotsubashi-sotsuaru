@@ -32,10 +32,6 @@ body{background:var(--bg);font-family:'Noto Serif JP',serif;color:var(--ink);}
 ══════════════════════════════════════ */
 .screen{display:none;}
 .screen.on{display:block;}
-#setupScreen{min-height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-#setupScreen.on{display:flex;}
-#pwScreen{min-height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-#pwScreen.on{display:flex;}
 #viewScreen.on{display:block;min-height:100vh;}
 #adminScreen.on{display:block;min-height:100vh;}
 .btn{background:transparent;border:1px solid rgba(201,168,76,.4);border-radius:8px;color:var(--gold-l);font-family:'Noto Serif JP',serif;font-size:.85rem;padding:.55rem 1rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
@@ -59,9 +55,10 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 ═══════════════════════════════════════ */
 #setupScreen{
   background:linear-gradient(160deg,var(--bg),var(--bg2) 60%,var(--bg3));
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  flex-direction:column;align-items:center;justify-content:center;
   padding:2rem 1.5rem;padding-top:calc(2rem + var(--safe-t));min-height:100vh;gap:0;
 }
+#setupScreen.on{display:flex;}
 .setup-logo{font-family:'Shippori Mincho',serif;font-size:1.8rem;font-weight:800;color:var(--gold-l);letter-spacing:.2em;text-shadow:0 2px 24px rgba(201,168,76,.4);margin-bottom:.4rem;}
 .setup-logo span{color:var(--gold);}
 .setup-sub{color:var(--faded);font-size:.78rem;letter-spacing:.1em;margin-bottom:1.8rem;}
@@ -83,10 +80,12 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 ═══════════════════════════════════════ */
 #pwScreen{
   background:linear-gradient(160deg,var(--bg),var(--bg2) 60%,var(--bg3));
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  flex-direction:column;align-items:center;justify-content:flex-start;
   padding:3rem 1.5rem 3rem;padding-top:calc(3rem + var(--safe-t));min-height:100vh;gap:1.2rem;
   overflow-y:auto;-webkit-overflow-scrolling:touch;
 }
+#pwScreen.on{display:flex;}
+.pw-crest{font-size:3.5rem;filter:drop-shadow(0 2px 16px rgba(201,168,76,.5));margin-bottom:.2rem;}
 .pw-logo{font-family:'Shippori Mincho',serif;font-size:2rem;font-weight:800;color:var(--gold-l);letter-spacing:.2em;text-shadow:0 2px 24px rgba(201,168,76,.4);}
 .pw-logo span{color:var(--gold);}
 .pw-school{color:var(--gold);font-size:.85rem;letter-spacing:.1em;}
@@ -302,6 +301,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
      画面2: パスワード入力
 ════════════════════════════════════════ -->
 <div id="pwScreen" class="screen">
+  <div class="pw-crest">🎓</div>
   <div class="pw-line"></div>
   <div class="pw-logo">思い出<span>アルバム</span></div>
   <div class="pw-school" id="pwSchoolName"></div>
