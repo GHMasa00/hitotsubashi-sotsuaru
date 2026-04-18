@@ -171,3 +171,251 @@ body{
 </div>
 
 <div id="viewScreen" class="screen">
+  <div class="sp-header">
+    <h1>思い出<span>アルバム</span></h1>
+    <p id="viewSchoolLabel" style="color:var(--faded); font-size:0.8rem;"></p>
+  </div>
+  <div style="padding:0.8rem; background:var(--bg3);">
+    <input id="viewSearch" type="search" placeholder="🔍 名前・検索" style="width:100%; padding:0.6rem; border-radius:20px; border:none; background:rgba(255,255,255,0.1); color:#fff; outline:none;">
+  </div>
+  <div class="grid-wrap">
+    <div class="photo-grid" id="viewGrid"></div>
+  </div>
+</div>
+
+<div id="adminScreen" class="screen">
+  <div class="sp-header">
+    <h1>管理<span>画面</span></h1>
+    <p id="adminSchoolLabel" style="color:var(--faded); font-size:0.8rem;"></p>
+  </div>
+  <div style="padding:0.5rem; background:var(--blue); color:#fff; font-size:0.7rem; text-align:center;" id="driveMsg">
+    Drive未接続
+  </div>
+  <div class="grid-wrap">
+    <div class="admin-grid" id="adminGrid" style="display:grid; grid-template-columns:repeat(2,1fr); gap:0.5rem; padding:0.5rem;"></div>
+  </div>
+</div>
+
+<nav class="bottom-nav" id="viewNav">
+  <button class="nav-item" onclick="startSS()"><span>▶</span><small>スライド</small></button>
+  <button class="nav-item" onclick="showScreen('pwScreen')"><span>🔑</span><small>戻る</small></button>
+</nav>
+
+<nav class="bottom-nav" id="adminNav">
+  <button class="nav-item" onclick="document.getElementById('fileInput').click()"><span>➕</span><small>追加</small></button>
+  <button class="nav-item" onclick="syncFromDrive()"><span>🔄</span><small>同期</small></button>
+  <button class="nav-item" onclick="showScreen('viewScreen'); renderViewGrid();"><span>👁</span><small>閲覧</small></button>
+</nav>
+
+<input type="file" id="fileInput" multiple accept="image/*" style="display:none">
+
+<div class="ss" id="ss">
+  <img class="ss-img" id="ssImg">
+  <div style="color:#fff; margin-top:1rem; text-align:center;">
+    <div id="ssName" style="font-size:1.2rem; font-weight:bold;"></div>
+    <div id="ssCnt" style="font-size:0.8rem; opacity:0.6;"></div>
+  </div>
+  <div style="position:fixed; bottom:2rem; display:flex; gap:1rem;">
+    <button class="btn" onclick="showSlide(ssIdx-1)">◀</button>
+    <button class="btn" onclick="stopSS()">✕ 閉じる</button>
+    <button class="btn" onclick="showSlide(ssIdx+1)">▶</button>
+  </div>
+</div>
+
+<script>
+// --- 基本設定 ---
+const GAPI_CLIENT_ID = '1060250626561-rs6tnhuhvr61qorkdhkitp6bnki12dn1.apps.googleusercontent.com';
+const DRIVE_FOLDER_ID = '1oUajUSeZo9sHTp60jdXalfHPKsx2m-1m';
+const SKEY_DATA = 'sotsuaru_v5_data';
+const SKEY_CONFIG = 'sotsuaru_v5_config';
+
+let photos = [];
+let config = null;
+let accessToken = null;
+let tokenClient = null;
+
+const $ = (id) => document.getElementById(id);
+
+// --- 初期化 ---
+window.onload = () => {
+  const savedConfig = localStorage.getItem(SKEY_CONFIG);
+  if (savedConfig) {
+    config = JSON.parse(savedConfig);
+    showScreen('pwScreen');
+    $('pwSchoolName').textContent = config.schoolName + " " + config.year;
+  } else {
+    showScreen('setupScreen');
+  }
+  
+  const savedData = localStorage.getItem(SKEY_DATA);
+  if (savedData) photos = JSON.parse(savedData);
+  
+  initGAPI();
+};
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  $(id).classList.add('on');
+  $('viewNav').classList.toggle('on', id === 'viewScreen');
+  $('adminNav').classList.toggle('on', id === 'adminScreen');
+  window.scrollTo(0, 0);
+}
+
+function resetAllConfig() {
+  if(confirm("初期設定をやり直します。よろしいですか？")) {
+    localStorage.removeItem(SKEY_CONFIG);
+    location.reload();
+  }
+}
+
+// --- パスワード処理 ---
+$('pwEnterBtn').onclick = () => {
+  const val = $('pwInput').value;
+  if (!config) return;
+  
+  if (val === config.adminPw) {
+    showScreen('adminScreen');
+    $('adminSchoolLabel').textContent = config.schoolName;
+    renderAdminGrid();
+  } else if (val === config.viewPw) {
+    showScreen('viewScreen');
+    $('viewSchoolLabel').textContent = config.schoolName;
+    renderViewGrid();
+  } else {
+    $('pwErr').textContent = "パスワードが正しくありません";
+    setTimeout(() => { $('pwErr').textContent = ""; }, 2000);
+  }
+};
+
+// --- グリッド描画 ---
+function renderViewGrid() {
+  const grid = $('viewGrid');
+  grid.innerHTML = "";
+  photos.forEach(p => {
+    const div = document.createElement('div');
+    div.style.background = "#fff";
+    div.style.borderRadius = "8px";
+    div.style.overflow = "hidden";
+    div.innerHTML = `
+      <img src="${p.url}" style="width:100%; aspect-ratio:1; object-fit:cover;">
+      <div style="padding:0.5rem; font-size:0.8rem; color:#333;">${p.name || '名前未登録'}</div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function renderAdminGrid() {
+  const grid = $('adminGrid');
+  grid.innerHTML = "";
+  photos.forEach((p, idx) => {
+    const div = document.createElement('div');
+    div.style.background = "#eee";
+    div.style.padding = "5px";
+    div.innerHTML = `
+      <img src="${p.url}" style="width:100%; aspect-ratio:1; object-fit:cover;">
+      <input type="text" value="${p.name || ''}" placeholder="名前" style="width:100%; margin-top:4px;" onchange="updateName(${idx}, this.value)">
+      <button onclick="deletePhoto(${idx})" style="width:100%; background:#c05050; color:#fff; border:none; margin-top:4px; font-size:0.7rem; padding:3px;">削除</button>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function updateName(idx, val) {
+  photos[idx].name = val;
+  saveData();
+}
+
+function deletePhoto(idx) {
+  if(confirm("削除しますか？")) {
+    photos.splice(idx, 1);
+    saveData();
+    renderAdminGrid();
+  }
+}
+
+function saveData() {
+  localStorage.setItem(SKEY_DATA, JSON.stringify(photos));
+}
+
+// --- セットアップ保存 ---
+$('setupDoneBtn').onclick = () => {
+  const c = {
+    schoolName: $('setupSchool').value,
+    year: $('setupYear').value,
+    viewPw: $('setupViewPw').value,
+    adminPw: $('setupAdminPw').value
+  };
+  if(!c.schoolName || !c.viewPw || !c.adminPw) {
+    $('setupErr').textContent = "必須項目を入力してください";
+    return;
+  }
+  localStorage.setItem(SKEY_CONFIG, JSON.stringify(c));
+  location.reload();
+};
+
+// --- Google Drive API 簡易版 ---
+function initGAPI() {
+  try {
+    gapi.load('client', async () => {
+      await gapi.client.init({discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"]});
+    });
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GAPI_CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/drive.file',
+      callback: (res) => {
+        accessToken = res.access_token;
+        $('driveMsg').textContent = "Drive接続済み";
+      }
+    });
+  } catch(e) { console.log(e); }
+}
+
+$('setupDriveBtn').onclick = () => {
+  tokenClient.requestAccessToken();
+};
+
+async function syncFromDrive() {
+  if(!accessToken) {
+    tokenClient.requestAccessToken();
+    return;
+  }
+  alert("同期機能：フォルダ内をスキャンします（実装済み想定）");
+}
+
+// --- スライドショー ---
+let ssIdx = 0;
+function startSS() {
+  if(photos.length === 0) return;
+  $('ss').classList.add('on');
+  showSlide(0);
+}
+function stopSS() { $('ss').classList.remove('on'); }
+function showSlide(n) {
+  if(n < 0) n = photos.length - 1;
+  if(n >= photos.length) n = 0;
+  ssIdx = n;
+  $('ssImg').src = photos[ssIdx].url;
+  $('ssName').textContent = photos[ssIdx].name || "名前未登録";
+  $('ssCnt').textContent = (ssIdx + 1) + " / " + photos.length;
+}
+
+// 写真追加（Base64変換して保存）
+$('fileInput').onchange = (e) => {
+  const files = e.target.files;
+  for(let f of files) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      photos.push({
+        id: Date.now() + Math.random(),
+        url: ev.target.result,
+        name: ""
+      });
+      saveData();
+      renderAdminGrid();
+    };
+    reader.readAsDataURL(f);
+  }
+};
+</script>
+</body>
+</html>
