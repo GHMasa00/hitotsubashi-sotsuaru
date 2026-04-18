@@ -159,6 +159,9 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 #classPage.on{display:block;}
 .cp-header{background:linear-gradient(180deg,var(--bg),var(--bg2));border-bottom:2px solid var(--gold);padding:.85rem 1rem;padding-top:calc(.85rem + var(--safe-t));display:flex;align-items:center;gap:.75rem;position:sticky;top:0;z-index:50;}
 .cp-back{background:none;border:none;color:var(--gold);font-size:1.3rem;cursor:pointer;padding:.2rem .4rem;-webkit-tap-highlight-color:transparent;touch-action:manipulation;line-height:1;}
+.cp-search-bar{background:var(--bg2);border-bottom:1px solid rgba(201,168,76,.15);padding:.6rem .75rem;}
+.cp-search-bar input{width:100%;background:rgba(245,240,232,.08);border:1px solid rgba(201,168,76,.25);border-radius:20px;padding:.5rem .9rem;color:var(--cream);outline:none;font-family:'Noto Serif JP',serif;font-size:.9rem;}
+.cp-search-bar input::placeholder{color:rgba(160,144,112,.45);}
 .cp-title{font-family:'Shippori Mincho',serif;font-size:1.1rem;font-weight:600;color:var(--gold-l);letter-spacing:.15em;}
 .cp-body{padding:.75rem .6rem 5rem;}
 .scan-block{margin-bottom:1.5rem;}
@@ -166,7 +169,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 .scan-img-wrap img{width:100%;height:auto;display:block;}
 .name-pins{position:absolute;inset:0;pointer-events:none;}
 .name-pin{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer;}
-.name-pin-dot{width:28px;height:28px;border-radius:50%;background:rgba(201,168,76,.25);border:2px solid rgba(201,168,76,.7);display:flex;align-items:center;justify-content:center;transition:background .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.name-pin-dot{width:44px;height:44px;border-radius:50%;background:transparent;border:none;display:flex;align-items:center;justify-content:center;transition:background .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
 .name-pin:active .name-pin-dot{background:rgba(201,168,76,.6);}
 .name-pin-label{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:rgba(26,18,8,.88);color:var(--gold-l);font-size:.6rem;white-space:nowrap;padding:.2rem .45rem;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .15s;letter-spacing:.04em;}
 .name-pin:hover .name-pin-label,.name-pin.active .name-pin-label{opacity:1;}
@@ -367,38 +370,38 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
     <h1>思い出<span>アルバム</span></h1>
     <p id="viewSchoolLabel"></p>
   </div>
+  <div class="search-bar">
+    <input id="viewSearch" type="search" placeholder="🔍 名前・あだ名で検索" autocomplete="off">
+  </div>
   <div class="class-grid" id="classGrid">
     <div class="class-card" data-class="1">
-      <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1zEbEPKEHiE3jBNefNAuAiyr2ggDZr-eo&sz=w400" alt="3年1組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
+      <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1zEbEPKEHiE3jBNefNAuAiyr2ggDZr-eo&sz=w800" alt="3年1組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
       <div class="class-label"><span class="class-name">3年1組</span><span class="class-arrow">›</span></div>
     </div>
     <div class="class-card" data-class="2">
-      <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1ZVk27Weatz7IcsEu-K7tB5UhINk8X10-&sz=w400" alt="3年2組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
+      <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1ZVk27Weatz7IcsEu-K7tB5UhINk8X10-&sz=w800" alt="3年2組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
       <div class="class-label"><span class="class-name">3年2組</span><span class="class-arrow">›</span></div>
     </div>
     <div class="class-card" data-class="3">
-      <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1tBXYgTu65zf_JKIo8OkQRiieR-FrhuqD&sz=w400" alt="3年3組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
+      <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1tBXYgTu65zf_JKIo8OkQRiieR-FrhuqD&sz=w800" alt="3年3組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
       <div class="class-label"><span class="class-name">3年3組</span><span class="class-arrow">›</span></div>
     </div>
     <div class="class-card" data-class="4">
-      <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1vQJGvAElE9wAiwo5p7Kji0SEWamk2B85&sz=w400" alt="3年4組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
+      <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1vQJGvAElE9wAiwo5p7Kji0SEWamk2B85&sz=w800" alt="3年4組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
       <div class="class-label"><span class="class-name">3年4組</span><span class="class-arrow">›</span></div>
     </div>
     <div class="class-card" data-class="5">
-      <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1lVGJ0KmKr08e5QjialpLAiqch1tDFHC6&sz=w400" alt="3年5組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
+      <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1lVGJ0KmKr08e5QjialpLAiqch1tDFHC6&sz=w800" alt="3年5組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
       <div class="class-label"><span class="class-name">3年5組</span><span class="class-arrow">›</span></div>
     </div>
     <div class="class-card" data-class="6">
-      <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1V7SyV0SkCLz0g36wtvxG3mlkSxoWxC94&sz=w400" alt="3年6組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
+      <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1V7SyV0SkCLz0g36wtvxG3mlkSxoWxC94&sz=w800" alt="3年6組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
       <div class="class-label"><span class="class-name">3年6組</span><span class="class-arrow">›</span></div>
     </div>
     <div class="class-card" data-class="7">
-      <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1q9ENebnRAHkoJlW7jRO2EluP8RS_Y7IM&sz=w400" alt="3年7組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
+      <div class="class-thumb"><img src="https://drive.google.com/thumbnail?id=1q9ENebnRAHkoJlW7jRO2EluP8RS_Y7IM&sz=w800" alt="3年7組" onerror="this.parentNode.innerHTML='<div class=class-thumb-ph>📷</div>'"></div>
       <div class="class-label"><span class="class-name">3年7組</span><span class="class-arrow">›</span></div>
     </div>
-  </div>
-  <div class="search-bar">
-    <input id="viewSearch" type="search" placeholder="🔍 名前・あだ名で検索" autocomplete="off">
   </div>
   <div class="tabs" id="viewTabs">
     <button class="tab on" data-filter="all">すべて</button>
@@ -428,6 +431,9 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
   <div class="cp-header">
     <button class="cp-back" id="cpBack">‹ 戻る</button>
     <span class="cp-title" id="cpTitle">3年1組</span>
+  </div>
+  <div class="cp-search-bar">
+    <input id="cpSearch" type="search" placeholder="🔍 名前で検索" autocomplete="off">
   </div>
   <div class="cp-body" id="cpBody">
     <!-- スキャン画像2枚 + 名前タップでズーム -->
@@ -1031,6 +1037,7 @@ function openClassPage(classNum) {
   if(!scans || !coords) return;
 
   $('cpTitle').textContent = `3年${classNum}組`;
+  document.getElementById('cpSearch').value = '';
   const body = $('cpBody');
   body.innerHTML = '';
 
@@ -1109,6 +1116,17 @@ function openZoom(person, imgSrc, origW, origH, px, py, dispW, dispH) {
 $('zoomOverlay').addEventListener('click', () => {
   $('zoomOverlay').classList.remove('on');
   document.querySelectorAll('.name-pin').forEach(el => el.classList.remove('active'));
+});
+
+
+// クラスページ内検索
+document.getElementById('cpSearch').addEventListener('input', e => {
+  const q = e.target.value.trim();
+  document.querySelectorAll('.name-pin').forEach(pin => {
+    const label = pin.querySelector('.name-pin-label');
+    const name = label ? label.textContent : '';
+    pin.style.display = (!q || name.includes(q)) ? '' : 'none';
+  });
 });
 
 $('cpBack').addEventListener('click', () => {
@@ -1229,6 +1247,9 @@ $('pwEnterBtn').onclick = $('pwInput').onkeydown = function(e){
     $('pwInput').value = '';
     showScreen('viewScreen');
     $('viewSchoolLabel').textContent = `${config.schoolName}　${config.year}卒業`;
+    // 初期状態：クラスグリッドのみ表示
+    document.getElementById('viewTabs').style.display = 'none';
+    document.querySelector('.grid-wrap').style.display = 'none';
     renderViewGrid();
     initGAPIIfNeeded();
     // 閲覧ログイン後にDriveから写真を自動同期
@@ -1487,7 +1508,22 @@ $('viewTabs').querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
   currentFilter=t.dataset.filter;
   renderViewGrid();
 });
-$('viewSearch').oninput=()=>renderViewGrid();
+$('viewSearch').oninput=()=>{
+  const q=$('viewSearch').value.trim();
+  const classGrid=document.getElementById('classGrid');
+  const viewTabs=document.getElementById('viewTabs');
+  const gridWrap=document.querySelector('.grid-wrap');
+  if(q){
+    classGrid.style.display='none';
+    viewTabs.style.display='flex';
+    gridWrap.style.display='block';
+  } else {
+    classGrid.style.display='flex';
+    viewTabs.style.display='none';
+    gridWrap.style.display='none';
+  }
+  renderViewGrid();
+};
 
 // 写真詳細
 function openDetail(id){
