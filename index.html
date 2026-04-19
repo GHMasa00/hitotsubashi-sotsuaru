@@ -173,7 +173,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 .name-pin:active .name-pin-dot{background:rgba(201,168,76,.6);}
 .name-pin-label{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:rgba(26,18,8,.88);color:var(--gold-l);font-size:.6rem;white-space:nowrap;padding:.2rem .45rem;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .15s;letter-spacing:.04em;}
 .name-pin:hover .name-pin-label,.name-pin.active .name-pin-label{opacity:1;}
-.name-pin-highlight{position:absolute;border:2.5px solid rgba(255,140,0,.9);border-radius:4px;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 0 1px rgba(0,0,0,.3);transition:opacity .2s;opacity:0;}
+.name-pin-highlight{position:absolute;border:2.5px solid rgba(255,140,0,.95);border-radius:6px;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 8px rgba(255,140,0,.4),0 0 0 1px rgba(0,0,0,.3);transition:opacity .2s;opacity:0;top:0;left:0;}
 .name-pin.active .name-pin-highlight{opacity:1;}
 
 /* ズームオーバーレイ */
@@ -1060,17 +1060,9 @@ function openClassPage(classNum, focusPerson) {
 
   showScreen('classPage');
   $('classPage').scrollTop = 0;
-  // focusPersonがあれば少し待ってからズーム
+  // focusPersonがあれば画像ロード後にハイライト
   if(focusPerson) {
-    setTimeout(() => {
-      const allPins = document.querySelectorAll('.name-pin');
-      allPins.forEach(pin => {
-        const label = pin.querySelector('.name-pin-label');
-        if(label && label.textContent === focusPerson.name) {
-          pin.click();
-        }
-      });
-    }, 800);
+    setTimeout(() => highlightPerson(focusPerson), 900);
   }
 }
 
@@ -1137,15 +1129,54 @@ $('zoomOverlay').addEventListener('click', () => {
 });
 
 
-// クラスページ内検索
+// クラスページ内検索（全クラス対象）
 document.getElementById('cpSearch').addEventListener('input', e => {
   const q = e.target.value.trim();
-  document.querySelectorAll('.name-pin').forEach(pin => {
-    const label = pin.querySelector('.name-pin-label');
-    const name = label ? label.textContent : '';
-    pin.style.display = (!q || name.includes(q)) ? '' : 'none';
-  });
+  if(!q) {
+    // クリア時：全ピン表示、ハイライト枠非表示
+    document.querySelectorAll('.name-pin').forEach(p => {
+      p.style.display = '';
+      p.classList.remove('active');
+    });
+    $('zoomOverlay').classList.remove('on');
+    return;
+  }
+  // 全クラスから検索して最初にヒットした人のクラスページを開く
+  const results = searchClassCoords(q);
+  if(results.length > 0) {
+    const person = results[0];
+    // 現在のクラスページと違う場合はクラスページを切り替え
+    const currentTitle = $('cpTitle').textContent;
+    const targetTitle = `3年${person.classNum}組`;
+    if(currentTitle !== targetTitle) {
+      openClassPage(person.classNum, person);
+    } else {
+      // 同じクラスならそのまま該当ピンをハイライト
+      setTimeout(() => highlightPerson(person), 100);
+    }
+  }
 });
+
+function highlightPerson(person) {
+  document.querySelectorAll('.name-pin').forEach(pin => {
+    pin.classList.remove('active');
+    const label = pin.querySelector('.name-pin-label');
+    if(label && label.textContent === person.name) {
+      pin.classList.add('active');
+      // スクロールして見えるようにする
+      pin.scrollIntoView({behavior:'smooth', block:'center'});
+      openZoom(person, 
+        document.querySelector(`#scanWrap${person.pageIndex} img`)?.src || '',
+        CLASS_SCANS[person.classNum][person.pageIndex].w,
+        CLASS_SCANS[person.classNum][person.pageIndex].h,
+        person.x * (document.querySelector(`#scanWrap${person.pageIndex} img`)?.offsetWidth / CLASS_SCANS[person.classNum][person.pageIndex].w || 1),
+        person.y * (document.querySelector(`#scanWrap${person.pageIndex} img`)?.offsetHeight / CLASS_SCANS[person.classNum][person.pageIndex].h || 1),
+        document.querySelector(`#scanWrap${person.pageIndex} img`)?.offsetWidth || 300,
+        document.querySelector(`#scanWrap${person.pageIndex} img`)?.offsetHeight || 400
+      );
+    }
+  });
+}
 
 $('cpBack').addEventListener('click', () => {
   showScreen('viewScreen');
