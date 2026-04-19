@@ -1176,7 +1176,7 @@ function openClassPage(classNum, focusPerson, focusPersons) {
     block.className = 'scan-block';
     block.innerHTML = `
       <div class="scan-img-wrap" id="scanWrap${pi}">
-        <img src="${imgUrl}" alt="集合写真${pi+1}" onload="attachPins(${pi}, ${scan.w}, ${scan.h}, ${JSON.stringify(pins).replace(/"/g,'&quot;')})" onerror="this.src=''">
+        <img src="${imgUrl}" alt="集合写真${pi+1}" onload="attachPins(${pi}, ${scan.w}, ${scan.h}, ${JSON.stringify(pins).replace(/"/g,'&quot;')}, ${classNum})" onerror="this.src=''">
         <div class="name-pins" id="pins${pi}"></div>
       </div>`;
     body.appendChild(block);
@@ -1192,7 +1192,7 @@ function openClassPage(classNum, focusPerson, focusPersons) {
   }
 }
 
-function attachPins(pi, origW, origH, pins) {
+function attachPins(pi, origW, origH, pins, classNum) {
   const wrap = $(`scanWrap${pi}`);
   const img = wrap.querySelector('img');
   const pinsEl = $(`pins${pi}`);
@@ -1229,7 +1229,9 @@ function attachPins(pi, origW, origH, pins) {
       pinsEl.querySelectorAll('.name-pin').forEach(el => el.classList.remove('active'));
       clearHighlightCanvases();
       pin.classList.add('active');
-      openZoom(p, img.src, origW, origH, p.x * scaleX, p.y * scaleY, img.offsetWidth, img.offsetHeight);
+      // classNum・pageIndexをpersonに付加（Sheets書き込みに必要）
+      const personWithMeta = Object.assign({}, p, { classNum, pageIndex: pi });
+      openZoom(personWithMeta, img.src, origW, origH, p.x * scaleX, p.y * scaleY, img.offsetWidth, img.offsetHeight);
     });
     pinsEl.appendChild(pin);
   });
