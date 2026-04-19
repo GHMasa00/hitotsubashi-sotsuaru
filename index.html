@@ -183,6 +183,15 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 .zoom-img-wrap{width:min(350px,85vw);height:min(420px,70vw/0.85);border-radius:8px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.7);background:#1a1208;position:relative;}
 .zoom-img-wrap .zoom-bg{width:100%;height:100%;background-size:auto;background-repeat:no-repeat;}
 .zoom-name{font-family:'Shippori Mincho',serif;font-size:1.3rem;font-weight:600;color:var(--gold-l);letter-spacing:.15em;text-shadow:0 2px 12px rgba(0,0,0,.8);}
+.zoom-nick{font-size:.9rem;color:var(--sepia);letter-spacing:.08em;min-height:1.2em;text-align:center;}
+.zoom-admin-row{display:flex;flex-direction:column;align-items:center;gap:.5rem;margin-top:.25rem;}
+.zoom-nick-btn{background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.4);border-radius:4px;color:var(--gold-l);font-size:.78rem;padding:.35rem .85rem;cursor:pointer;letter-spacing:.05em;transition:background .2s;}
+.zoom-nick-btn:hover{background:rgba(201,168,76,.3);}
+.zoom-nick-edit{display:flex;align-items:center;gap:.4rem;}
+.zoom-nick-input{background:rgba(255,255,255,.1);border:1px solid rgba(201,168,76,.5);border-radius:4px;color:var(--gold-l);font-size:.88rem;padding:.35rem .6rem;width:140px;outline:none;font-family:'Noto Serif JP',serif;}
+.zoom-nick-input:focus{border-color:var(--gold);}
+.zoom-nick-save{background:var(--gold);border:none;border-radius:4px;color:#1a1208;font-size:.78rem;font-weight:600;padding:.35rem .75rem;cursor:pointer;}
+.zoom-nick-cancel{background:transparent;border:1px solid rgba(160,144,112,.4);border-radius:4px;color:var(--faded);font-size:.78rem;padding:.35rem .5rem;cursor:pointer;}
 /* ボトムナビ */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:var(--bg2);border-top:1px solid rgba(201,168,76,.2);display:none;padding-bottom:max(var(--safe-b),0px);}
 .bottom-nav.on{display:flex;}
@@ -446,6 +455,15 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
   <div class="zoom-inner" id="zoomInner">
     <div class="zoom-img-wrap" id="zoomImgWrap"></div>
     <div class="zoom-name" id="zoomName"></div>
+    <div class="zoom-nick" id="zoomNick"></div>
+    <div class="zoom-admin-row" id="zoomAdminRow" style="display:none">
+      <button class="zoom-nick-btn" id="zoomNickBtn">✏️ あだ名</button>
+      <div class="zoom-nick-edit" id="zoomNickEdit" style="display:none">
+        <input class="zoom-nick-input" id="zoomNickInput" type="text" placeholder="あだ名を入力" maxlength="20">
+        <button class="zoom-nick-save" id="zoomNickSave">保存</button>
+        <button class="zoom-nick-cancel" id="zoomNickCancel">×</button>
+      </div>
+    </div>
   </div>
 </div>
 <!-- 写真詳細モーダル -->
@@ -651,10 +669,11 @@ let ssIdx=0,ssTimer=null,ssPaused=false,swipeX=null;
 const $=(id)=>document.getElementById(id);
 function load(msg){$('loadTxt').textContent=msg||'処理中...';$('loading').classList.add('on');}
 function unload(){$('loading').classList.remove('on');}
+let currentScreen = '';
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   $(id).classList.add('on');
-  // ナビ切り替え
+  currentScreen = id;
   $('viewNav').classList.toggle('on', id==='viewScreen');
   $('adminNav').classList.toggle('on', id==='adminScreen');
 }
@@ -664,6 +683,81 @@ function showScreen(id){
 // ════════════════════════════════════════════════════════
 // クラスページ データ
 // ════════════════════════════════════════════════════════
+
+// ── あだ名オーバーライド管理 ─────────────────────────────
+// KEY: "クラス番号_名前" → nick文字列 をlocalStorageで永続化
+const NICK_STORAGE_KEY   = 'sotsuaru_nicks_v1';
+const NICK_SHEET_ID      = '1UJB78CQ7fjbWfZkGD6FrfJ2wueInJKErZdtn4Tjh6Wo';
+
+function loadNickOverrides() {
+  try {
+    const raw = localStorage.getItem(NICK_STORAGE_KEY);
+    if (!raw) return;
+    const overrides = JSON.parse(raw); // {"1_浅野大輔": "あさのん", ...}
+    // CLASS_COORDSの各personにnickを反映
+    for (const [key, nick] of Object.entries(overrides)) {
+      const sep = key.indexOf('_');
+      const cls = parseInt(key.slice(0, sep));
+      const name = key.slice(sep + 1);
+      const coords = CLASS_COORDS[cls];
+      if (!coords) continue;
+      for (const page of Object.values(coords)) {
+        const person = page.find(p => p.name === name);
+        if (person) { person.nick = nick; break; }
+      }
+    }
+  } catch(e) { console.warn('nick load error', e); }
+}
+
+function saveNickOverrides(overrides) {
+  try {
+    localStorage.setItem(NICK_STORAGE_KEY, JSON.stringify(overrides));
+  } catch(e) { console.warn('nick save error', e); }
+}
+
+// 起動時に反映
+loadNickOverrides();
+
+// ── スプレッドシートからあだ名を自動取得（閲覧者含む全デバイス対応） ──
+async function fetchNicksFromSheet() {
+  const classNums = [1,2,3,4,5,6,7];
+  const overrides = {};
+  let totalUpdated = 0;
+  for(const cls of classNums) {
+    const sheetName = encodeURIComponent(`3年${cls}組`);
+    const url = `https://docs.google.com/spreadsheets/d/${NICK_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${sheetName}`;
+    try {
+      const res = await fetch(url);
+      if(!res.ok) continue;
+      const text = await res.text();
+      const rows = text.trim().split('\n').map(r =>
+        r.split(',').map(c => c.replace(/^"|"$/g,'').trim())
+      );
+      for(const row of rows) {
+        const name = row[2] || '';
+        const nick = row[3] || '';
+        if(!name || name === '名前') continue; // ヘッダースキップ
+        const key = `${cls}_${name}`;
+        if(nick) overrides[key] = nick;
+        // CLASS_COORDSに即時反映
+        const coords = CLASS_COORDS[cls];
+        if(coords) {
+          for(const page of Object.values(coords)) {
+            const person = page.find(p => p.name === name);
+            if(person) { person.nick = nick; totalUpdated++; break; }
+          }
+        }
+      }
+    } catch(e) { /* ネットワークエラーは無視 */ }
+  }
+  // localStorageにキャッシュ
+  saveNickOverrides(overrides);
+  console.log(`あだ名 ${Object.keys(overrides).length}件をシートから取得しました`);
+}
+
+// 起動時にシートからあだ名を取得（失敗してもlocalStorageキャッシュで動作）
+fetchNicksFromSheet().catch(() => {});
+
 const CLASS_SCANS = {
   1: [
     {fileId:'19zLP0RgQFjrFId7AJs7rXYpBbLuJF95-', w:3072, h:4080},
@@ -1117,19 +1211,21 @@ function clearHighlightCanvases() {
   });
 }
 
+// 現在ズーム表示中の人物を保持（あだ名保存に使用）
+let currentZoomPerson = null;
+
 function openZoom(person, imgSrc, origW, origH, px, py, dispW, dispH) {
+  currentZoomPerson = person;
   const isTeacher = person.type === 'teacher';
   const range = isTeacher ? 270 : 230;
   const ratio = isTeacher ? 1.2 : 0.85;
   const dispWPx = 350;
   const dispHPx = Math.round(dispWPx * ratio);
 
-  // background-positionの計算
   const scale = dispWPx / (range * 2);
   const bgSize = `${origW * scale}px ${origH * scale}px`;
-  // 表示領域中央に顔が来るように
-  const scaleOrig = dispW / origW; // img表示倍率
-  const faceOrigX = px / scaleOrig; // 元画像座標
+  const scaleOrig = dispW / origW;
+  const faceOrigX = px / scaleOrig;
   const faceOrigY = py / scaleOrig;
   const bgX = -(faceOrigX * scale - dispWPx / 2);
   const bgY = -(faceOrigY * scale - dispHPx / 2);
@@ -1140,6 +1236,13 @@ function openZoom(person, imgSrc, origW, origH, px, py, dispW, dispH) {
   wrap.style.height = dispHPx + 'px';
   wrap.innerHTML = `<div class="zoom-bg" style="width:100%;height:100%;background-image:url('${imgSrc}');background-size:${bgSize};background-position:${bgPos};background-repeat:no-repeat;"></div>`;
   $('zoomName').textContent = person.name;
+  $('zoomNick').textContent = person.nick ? `「${person.nick}」` : '';
+
+  // 管理者モード（直前の画面がadminScreen）のときだけあだ名ボタンを表示
+  $('zoomAdminRow').style.display = (currentScreen === 'adminScreen') ? 'flex' : 'none';
+  $('zoomNickEdit').style.display = 'none';
+  $('zoomNickBtn').style.display  = 'inline-block';
+  $('zoomNickInput').value = person.nick || '';
   $('zoomOverlay').classList.add('on');
 }
 
@@ -1147,7 +1250,99 @@ $('zoomOverlay').addEventListener('click', () => {
   $('zoomOverlay').classList.remove('on');
   document.querySelectorAll('.name-pin').forEach(el => el.classList.remove('active'));
   clearHighlightCanvases();
+  // あだ名入力欄をリセット
+  $('zoomNickEdit').style.display = 'none';
+  $('zoomNickBtn').style.display  = 'inline-block';
+  currentZoomPerson = null;
 });
+
+// ── あだ名ボタンのイベント処理 ────────────────────────────
+$('zoomNickBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  $('zoomNickEdit').style.display = 'flex';
+  $('zoomNickBtn').style.display  = 'none';
+  $('zoomNickInput').focus();
+});
+
+$('zoomNickCancel').addEventListener('click', e => {
+  e.stopPropagation();
+  $('zoomNickEdit').style.display = 'none';
+  $('zoomNickBtn').style.display  = 'inline-block';
+});
+
+$('zoomNickSave').addEventListener('click', async e => {
+  e.stopPropagation();
+  if(!currentZoomPerson) return;
+  const nick = $('zoomNickInput').value.trim();
+  const person = currentZoomPerson;
+
+  // CLASS_COORDSに即時反映
+  person.nick = nick;
+  $('zoomNick').textContent = nick ? `「${nick}」` : '';
+  $('zoomNickEdit').style.display = 'none';
+  $('zoomNickBtn').style.display  = 'inline-block';
+
+  // localStorageに保存
+  let overrides = {};
+  try { overrides = JSON.parse(localStorage.getItem(NICK_STORAGE_KEY)||'{}'); } catch(e){}
+  const key = `${person.classNum}_${person.name}`;
+  if(nick) { overrides[key] = nick; } else { delete overrides[key]; }
+  saveNickOverrides(overrides);
+
+  // Google Sheetsに書き込み
+  showToast('スプレッドシートに保存中...');
+  try {
+    await writeNickToSheet(person, nick);
+    showToast(`「${person.name}」のあだ名を保存しました`);
+  } catch(err) {
+    console.error('Sheets書き込みエラー:', err);
+    showToast('ローカル保存済み（Sheets書き込み失敗）');
+  }
+});
+
+// Enter キーでも保存
+$('zoomNickInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter') $('zoomNickSave').click();
+  if(e.key === 'Escape') $('zoomNickCancel').click();
+  e.stopPropagation();
+});
+
+// ── Sheets API：あだ名をスプレッドシートに書き込む ────────
+async function writeNickToSheet(person, nick) {
+  if(!accessToken) throw new Error('Drive未認証');
+
+  const sheetName  = `3年${person.classNum}組`;
+  const spreadsheetId = NICK_SHEET_ID;
+
+  // まずシートのデータを取得して対象行を特定
+  const getUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetName)}!A:D`;
+  const getRes = await fetch(getUrl, {
+    headers: { 'Authorization': 'Bearer ' + accessToken }
+  });
+  if(!getRes.ok) throw new Error('シート取得失敗: ' + getRes.status);
+  const getJson = await getRes.json();
+  const rows = getJson.values || [];
+
+  // 名前（C列=index2）で対象行を検索
+  let targetRow = -1;
+  for(let i = 0; i < rows.length; i++) {
+    if((rows[i][2] || '').trim() === person.name) { targetRow = i + 1; break; } // 1-indexed
+  }
+  if(targetRow < 0) throw new Error(`「${person.name}」が見つかりません`);
+
+  // D列（あだ名）を更新
+  const range = `${encodeURIComponent(sheetName)}!D${targetRow}`;
+  const putUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?valueInputOption=RAW`;
+  const putRes = await fetch(putUrl, {
+    method: 'PUT',
+    headers: {
+      'Authorization': 'Bearer ' + accessToken,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ values: [[nick]] })
+  });
+  if(!putRes.ok) throw new Error('Sheets書き込み失敗: ' + putRes.status);
+}
 
 // ズームオーバーレイ：左→右スワイプで閉じる
 (function(){
@@ -1165,6 +1360,9 @@ $('zoomOverlay').addEventListener('click', () => {
       $('zoomOverlay').classList.remove('on');
       document.querySelectorAll('.name-pin').forEach(el => el.classList.remove('active'));
       clearHighlightCanvases();
+      $('zoomNickEdit').style.display = 'none';
+      $('zoomNickBtn').style.display  = 'inline-block';
+      currentZoomPerson = null;
     }
     zSwipeX = null; zSwipeY = null;
   }, {passive: true});
@@ -1889,37 +2087,80 @@ $('xlsxInput').onchange=async e=>{
   load('Excelを読み込み中...');
   try{
     const buf=await f.arrayBuffer();
-    // SheetJSを動的ロード
     if(!window.XLSX){
       await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
     }
     const wb=XLSX.read(buf,{type:'array'});
-    const ws=wb.Sheets['あだ名マスター'];
-    if(!ws){alert('「あだ名マスター」シートが見つかりません');unload();return;}
-    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-    // ヘッダー行をスキップ（No.があるのが実データ行）
-    let imported=0;
-    for(const row of rows){
-      const no=row[0];
-      if(typeof no!=='number')continue;
-      const cls    = String(row[1]||'').trim();
-      const name   = String(row[2]||'').trim();
-      const nick   = String(row[3]||'').trim();
-      const phPath = String(row[5]||'').trim();
-      if(!name)continue;
-      // 既存の写真と名前・パスで照合して更新、なければ新規追加
-      const existing=photos.find(p=>p.name===name || (phPath && p.drvName===phPath.split('/').pop()));
-      if(existing){
-        if(name)  existing.name=name;
-        if(nick)  existing.nick=nick;
-        if(cls)   existing.cls=cls;
-      } else {
-        photos.push({id:'xl_'+Date.now()+Math.random(),name,nick,cls,cmt:'',type:'graduation',driveId:null,drvName:phPath.split('/').pop()||'',url:null,edited:null});
+
+    // ── あだ名入力シート形式（シート名「3年X組」）の判定 ──
+    const isNickSheet = wb.SheetNames.some(n => /^3年\d+組$/.test(n));
+
+    if(isNickSheet){
+      // あだ名入力シート.xlsx → CLASS_COORDSのnickを更新
+      let updated = 0;
+      // 既存オーバーライドをlocalStorageから読み込んでマージ
+      let overrides = {};
+      try { overrides = JSON.parse(localStorage.getItem(NICK_STORAGE_KEY)||'{}'); } catch(e){}
+
+      for(const sheetName of wb.SheetNames){
+        const m = sheetName.match(/^3年(\d+)組$/);
+        if(!m) continue;
+        const cls = parseInt(m[1]);
+        const ws = wb.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+        for(const row of rows){
+          const name = String(row[2]||'').trim();
+          const nick = String(row[3]||'').trim();
+          if(!name || name === '名前') continue; // ヘッダー行スキップ
+          const key = `${cls}_${name}`;
+          if(nick){
+            overrides[key] = nick;
+          } else {
+            // あだ名が空欄の場合は既存エントリを削除
+            delete overrides[key];
+          }
+          // CLASS_COORDSのpersonに即時反映
+          const coords = CLASS_COORDS[cls];
+          if(coords){
+            for(const page of Object.values(coords)){
+              const person = page.find(p => p.name === name);
+              if(person){ person.nick = nick; updated++; break; }
+            }
+          }
+        }
       }
-      imported++;
+      saveNickOverrides(overrides);
+      const nickCount = Object.keys(overrides).length;
+      showToast(`あだ名を${nickCount}件反映しました（空欄はクリア）`);
+
+    } else {
+      // 従来形式：「あだ名マスター」シート
+      const ws=wb.Sheets['あだ名マスター'];
+      if(!ws){alert('「あだ名マスター」シートまたは「3年X組」シートが見つかりません');unload();return;}
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      let imported=0;
+      for(const row of rows){
+        const no=row[0];
+        if(typeof no!=='number')continue;
+        const cls    = String(row[1]||'').trim();
+        const name   = String(row[2]||'').trim();
+        const nick   = String(row[3]||'').trim();
+        const phPath = String(row[5]||'').trim();
+        if(!name)continue;
+        const existing=photos.find(p=>p.name===name || (phPath && p.drvName===phPath.split('/').pop()));
+        if(existing){
+          if(name)  existing.name=name;
+          if(nick)  existing.nick=nick;
+          if(cls)   existing.cls=cls;
+        } else {
+          photos.push({id:'xl_'+Date.now()+Math.random(),name,nick,cls,cmt:'',type:'graduation',driveId:null,drvName:phPath.split('/').pop()||'',url:null,edited:null});
+        }
+        imported++;
+      }
+      saveCache();renderAdminGrid();renderViewGrid();
+      showToast(`${imported}件をインポートしました`);
     }
-    saveCache();renderAdminGrid();renderViewGrid();
-    showToast(`${imported}件をインポートしました`);
+
   }catch(err){console.error(err);alert('Excelの読み込みに失敗しました: '+err.message);}
   finally{unload();e.target.value='';}
 };
