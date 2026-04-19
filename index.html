@@ -1347,8 +1347,8 @@ async function writeNickToSheet(person, nick) {
   const sheetName     = `3年${person.classNum}組`;
   const spreadsheetId = NICK_SHEET_ID;
 
-  // シートデータ取得
-  const getUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(sheetName)}!A:D`;
+  // シートデータ取得（シート名全体をシングルクォートで囲んでエンコード）
+  const getUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent("'" + sheetName + "'!A:D")}`;
   const getRes = await fetch(getUrl, {
     headers: { 'Authorization': 'Bearer ' + accessToken }
   });
@@ -1362,12 +1362,13 @@ async function writeNickToSheet(person, nick) {
   // 名前（C列=index2）で対象行を検索
   let targetRow = -1;
   for(let i = 0; i < rows.length; i++) {
+    if((rows[i][2] || '').trim() === '名前') continue; // ヘッダースキップ
     if((rows[i][2] || '').trim() === person.name) { targetRow = i + 1; break; }
   }
   if(targetRow < 0) throw new Error(`「${person.name}」がシートに見つかりません（シート: ${sheetName}）`);
 
-  // D列（あだ名）を更新
-  const range  = `${encodeURIComponent(sheetName)}!D${targetRow}`;
+  // D列（あだ名）を更新（シート名全体をシングルクォートで囲んでエンコード）
+  const range  = encodeURIComponent(`'${sheetName}'!D${targetRow}`);
   const putUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${range}?valueInputOption=RAW`;
   const putRes = await fetch(putUrl, {
     method: 'PUT',
