@@ -173,8 +173,8 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 .name-pin:active .name-pin-dot{background:rgba(201,168,76,.6);}
 .name-pin-label{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:rgba(26,18,8,.88);color:var(--gold-l);font-size:.6rem;white-space:nowrap;padding:.2rem .45rem;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .15s;letter-spacing:.04em;}
 .name-pin:hover .name-pin-label,.name-pin.active .name-pin-label{opacity:1;}
-.name-pin-highlight{position:absolute;border:5px solid rgba(255,100,0,1);border-radius:6px;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 14px rgba(255,100,0,.8),0 0 0 2px rgba(0,0,0,.5);transition:opacity .2s;opacity:0;top:0;left:0;}
-.name-pin.active .name-pin-highlight{opacity:1;}
+.person-frame{position:absolute;border:5px solid #ff6600;border-radius:6px;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 14px rgba(255,102,0,.85);display:none;}
+.person-frame.on{display:block;}
 
 /* ズームオーバーレイ */
 .zoom-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(10,7,2,.92);backdrop-filter:blur(8px);align-items:center;justify-content:center;}
@@ -1076,21 +1076,27 @@ function attachPins(pi, origW, origH, pins) {
   const scaleY = img.offsetHeight / origH;
 
   pinsEl.innerHTML = '';
+  // 枠要素を1つ追加（ハイライト用・常にコンテナ直下）
+  const frameEl = document.createElement('div');
+  frameEl.className = 'person-frame';
+  frameEl.id = 'frame' + pi;
+  pinsEl.appendChild(frameEl);
+
   pins.forEach(p => {
     const pin = document.createElement('div');
     pin.className = 'name-pin';
     pin.style.left = (p.x * scaleX) + 'px';
     pin.style.top  = (p.y * scaleY) + 'px';
-    // ズーム範囲に対応するハイライト枠のサイズ（元画像のrange*2px → 表示スケール換算）
-    const range = p.type === 'teacher' ? 270 : 230;
-    const boxW = range * 2 * scaleX;
-    const boxH = range * 2 * (p.type === 'teacher' ? 1.2 : 0.85) * scaleX;
-    pin.innerHTML = `<div class="name-pin-dot"></div><div class="name-pin-label">${p.name}</div><div class="name-pin-highlight" style="width:${boxW}px;height:${boxH}px;"></div>`;
+    pin.dataset.origW = origW;
+    pin.dataset.origH = origH;
+    pin.innerHTML = `<div class="name-pin-dot"></div><div class="name-pin-label">${p.name}</div>`;
     pin.addEventListener('click', e => {
       e.stopPropagation();
-      // 全ピンのactiveを外す
+      // 全ピンのactiveを外す・枠を非表示
       pinsEl.querySelectorAll('.name-pin').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.person-frame').forEach(f => f.classList.remove('on'));
       pin.classList.add('active');
+      // 枠を即座に表示（クリック時は枠なし → そのままズーム）
       openZoom(p, img.src, origW, origH, p.x * scaleX, p.y * scaleY, img.offsetWidth, img.offsetHeight);
     });
     pinsEl.appendChild(pin);
@@ -1126,6 +1132,7 @@ function openZoom(person, imgSrc, origW, origH, px, py, dispW, dispH) {
 $('zoomOverlay').addEventListener('click', () => {
   $('zoomOverlay').classList.remove('on');
   document.querySelectorAll('.name-pin').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.person-frame').forEach(f => f.classList.remove('on'));
 });
 
 
@@ -1158,22 +1165,36 @@ document.getElementById('cpSearch').addEventListener('input', e => {
 });
 
 function highlightPerson(person) {
+  // 全ピンのactive・枠を非表示にリセット
+  document.querySelectorAll('.name-pin').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.person-frame').forEach(f => f.classList.remove('on'));
+
+  // 該当ピンを探してハイライト枠を表示
   document.querySelectorAll('.name-pin').forEach(pin => {
-    pin.classList.remove('active');
     const label = pin.querySelector('.name-pin-label');
     if(label && label.textContent === person.name) {
       pin.classList.add('active');
+      // ピンの親(name-pins)にある枠要素を取得してサイズ・位置を設定
+      const pinsEl = pin.parentElement;
+      const frameEl = pinsEl.querySelector('.person-frame');
+      const scanImg = pinsEl.previousElementSibling; // img
+      if(frameEl && scanImg) {
+        const origW = parseInt(pin.dataset.origW) || CLASS_SCANS[person.classNum]?.[person.pageIndex]?.w || 3072;
+        const origH = parseInt(pin.dataset.origH) || CLASS_SCANS[person.classNum]?.[person.pageIndex]?.h || 4080;
+        const scaleX = scanImg.offsetWidth / origW;
+        const scaleY = scanImg.offsetHeight / origH;
+        const range = person.type === 'teacher' ? 270 : 230;
+        const ratio = person.type === 'teacher' ? 1.2 : 0.85;
+        const boxW = range * 2 * scaleX;
+        const boxH = range * 2 * ratio * scaleX;
+        frameEl.style.width  = boxW + 'px';
+        frameEl.style.height = boxH + 'px';
+        frameEl.style.left   = (person.x * scaleX) + 'px';
+        frameEl.style.top    = (person.y * scaleY) + 'px';
+        frameEl.classList.add('on');
+      }
       // スクロールして見えるようにする
       pin.scrollIntoView({behavior:'smooth', block:'center'});
-      openZoom(person, 
-        document.querySelector(`#scanWrap${person.pageIndex} img`)?.src || '',
-        CLASS_SCANS[person.classNum][person.pageIndex].w,
-        CLASS_SCANS[person.classNum][person.pageIndex].h,
-        person.x * (document.querySelector(`#scanWrap${person.pageIndex} img`)?.offsetWidth / CLASS_SCANS[person.classNum][person.pageIndex].w || 1),
-        person.y * (document.querySelector(`#scanWrap${person.pageIndex} img`)?.offsetHeight / CLASS_SCANS[person.classNum][person.pageIndex].h || 1),
-        document.querySelector(`#scanWrap${person.pageIndex} img`)?.offsetWidth || 300,
-        document.querySelector(`#scanWrap${person.pageIndex} img`)?.offsetHeight || 400
-      );
     }
   });
 }
