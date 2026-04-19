@@ -1149,6 +1149,27 @@ $('zoomOverlay').addEventListener('click', () => {
   clearHighlightCanvases();
 });
 
+// ズームオーバーレイ：左→右スワイプで閉じる
+(function(){
+  let zSwipeX = null, zSwipeY = null;
+  $('zoomOverlay').addEventListener('touchstart', e => {
+    zSwipeX = e.touches[0].clientX;
+    zSwipeY = e.touches[0].clientY;
+  }, {passive: true});
+  $('zoomOverlay').addEventListener('touchend', e => {
+    if(zSwipeX === null) return;
+    const dx = e.changedTouches[0].clientX - zSwipeX;
+    const dy = e.changedTouches[0].clientY - zSwipeY;
+    // 横方向が主体 かつ 右向き 50px以上でクローズ
+    if(dx > 50 && Math.abs(dy) < Math.abs(dx)) {
+      $('zoomOverlay').classList.remove('on');
+      document.querySelectorAll('.name-pin').forEach(el => el.classList.remove('active'));
+      clearHighlightCanvases();
+    }
+    zSwipeX = null; zSwipeY = null;
+  }, {passive: true});
+})();
+
 
 // クラスページ内検索（全クラス対象）
 document.getElementById('cpSearch').addEventListener('input', e => {
