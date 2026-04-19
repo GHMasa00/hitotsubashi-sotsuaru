@@ -681,7 +681,7 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   $(id).classList.add('on');
   currentScreen = id;
-  $('viewNav').classList.toggle('on', id==='viewScreen' || id==='classPage');
+  // viewNavは管理者のみ非表示（閲覧者にはナビ不要）
   // adminNavはviewScreen/classPage表示中かつ管理者ログイン時に表示
   const onAlbum = (id==='viewScreen' || id==='classPage');
   $('adminNav').classList.toggle('on', onAlbum && isAdminLoggedIn);
@@ -1635,6 +1635,12 @@ $('pwEnterBtn').onclick = $('pwInput').onkeydown = function(e){
     isAdminLoggedIn = true;
     loginToViewScreen();
     renderAdminGrid();
+    // 管理者ログイン時は自動でGoogle OAuth認証を開始（Sheets書き込みに必要）
+    setTimeout(() => {
+      if(!accessToken && tokenClient) {
+        tokenClient.requestAccessToken({prompt: ''});
+      }
+    }, 800);
   } else if(v === config?.viewPw){
     $('pwInput').value = '';
     isAdminLoggedIn = false;
