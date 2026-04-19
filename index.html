@@ -165,7 +165,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 .cp-title{font-family:'Shippori Mincho',serif;font-size:1.1rem;font-weight:600;color:var(--gold-l);letter-spacing:.15em;}
 .cp-body{padding:.75rem .6rem 5rem;}
 .scan-block{margin-bottom:1.5rem;}
-.scan-img-wrap{position:relative;width:100%;background:#1a1208;border-radius:6px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.5);}
+.scan-img-wrap{position:relative;width:100%;background:#1a1208;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.5);}
 .scan-img-wrap img{width:100%;height:auto;display:block;}
 .name-pins{position:absolute;inset:0;pointer-events:none;}
 .name-pin{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer;}
@@ -173,8 +173,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 .name-pin:active .name-pin-dot{background:rgba(201,168,76,.6);}
 .name-pin-label{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:rgba(26,18,8,.88);color:var(--gold-l);font-size:.6rem;white-space:nowrap;padding:.2rem .45rem;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .15s;letter-spacing:.04em;}
 .name-pin:hover .name-pin-label,.name-pin.active .name-pin-label{opacity:1;}
-.person-frame{position:absolute;border:5px solid #ff6600;border-radius:6px;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 14px rgba(255,102,0,.85);display:none;}
-.person-frame.on{display:block;}
+.highlight-canvas{position:absolute;top:0;left:0;pointer-events:none;border-radius:6px;}
 
 /* ズームオーバーレイ */
 .zoom-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(10,7,2,.92);backdrop-filter:blur(8px);align-items:center;justify-content:center;}
@@ -1076,11 +1075,18 @@ function attachPins(pi, origW, origH, pins) {
   const scaleY = img.offsetHeight / origH;
 
   pinsEl.innerHTML = '';
-  // 枠要素を1つ追加（ハイライト用・常にコンテナ直下）
-  const frameEl = document.createElement('div');
-  frameEl.className = 'person-frame';
-  frameEl.id = 'frame' + pi;
-  pinsEl.appendChild(frameEl);
+
+  // Canvas要素をimg上に重ねて追加（ハイライト枠描画用）
+  let cvs = wrap.querySelector('.highlight-canvas');
+  if(!cvs) {
+    cvs = document.createElement('canvas');
+    cvs.className = 'highlight-canvas';
+    wrap.appendChild(cvs);
+  }
+  cvs.width  = img.offsetWidth;
+  cvs.height = img.offsetHeight;
+  cvs.style.width  = img.offsetWidth  + 'px';
+  cvs.style.height = img.offsetHeight + 'px';
 
   pins.forEach(p => {
     const pin = document.createElement('div');
@@ -1092,14 +1098,20 @@ function attachPins(pi, origW, origH, pins) {
     pin.innerHTML = `<div class="name-pin-dot"></div><div class="name-pin-label">${p.name}</div>`;
     pin.addEventListener('click', e => {
       e.stopPropagation();
-      // 全ピンのactiveを外す・枠を非表示
+      // 全ピンのactiveを外す・Canvas枠をクリア
       pinsEl.querySelectorAll('.name-pin').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.person-frame').forEach(f => f.classList.remove('on'));
+      clearHighlightCanvases();
       pin.classList.add('active');
-      // 枠を即座に表示（クリック時は枠なし → そのままズーム）
       openZoom(p, img.src, origW, origH, p.x * scaleX, p.y * scaleY, img.offsetWidth, img.offsetHeight);
     });
     pinsEl.appendChild(pin);
+  });
+}
+
+// 全Canvas枠をクリア
+function clearHighlightCanvases() {
+  document.querySelectorAll('.highlight-canvas').forEach(c => {
+    c.getContext('2d').clearRect(0, 0, c.width, c.height);
   });
 }
 
@@ -1132,7 +1144,7 @@ function openZoom(person, imgSrc, origW, origH, px, py, dispW, dispH) {
 $('zoomOverlay').addEventListener('click', () => {
   $('zoomOverlay').classList.remove('on');
   document.querySelectorAll('.name-pin').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.person-frame').forEach(f => f.classList.remove('on'));
+  clearHighlightCanvases();
 });
 
 
@@ -1145,6 +1157,7 @@ document.getElementById('cpSearch').addEventListener('input', e => {
       p.style.display = '';
       p.classList.remove('active');
     });
+    clearHighlightCanvases();
     $('zoomOverlay').classList.remove('on');
     return;
   }
@@ -1165,50 +1178,78 @@ document.getElementById('cpSearch').addEventListener('input', e => {
 });
 
 function highlightPerson(person) {
-  // 全ピンのactive・枠を非表示にリセット
+  // 全ピンのactiveをリセット・全Canvasをクリア
   document.querySelectorAll('.name-pin').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.person-frame').forEach(f => f.classList.remove('on'));
+  clearHighlightCanvases();
 
-  // 対象のpageIndexのscanWrapを直接取得
   const scanWrap = document.getElementById('scanWrap' + person.pageIndex);
-  const pinsEl   = document.getElementById('pins' + person.pageIndex);
+  const pinsEl   = document.getElementById('pins'    + person.pageIndex);
   if(!scanWrap || !pinsEl) return;
 
-  const scanImg  = scanWrap.querySelector('img');
-  const frameEl  = pinsEl.querySelector('.person-frame');
-  if(!scanImg || !frameEl) return;
+  const scanImg = scanWrap.querySelector('img');
+  if(!scanImg) return;
 
-  // 画像の表示サイズを取得（offsetWidthが0なら getBoundingClientRect を使う）
-  const rect = scanImg.getBoundingClientRect();
-  const dispW = rect.width  || scanImg.offsetWidth  || 300;
-  const dispH = rect.height || scanImg.offsetHeight || 400;
+  // 画像の表示サイズを確実に取得
+  const rect  = scanImg.getBoundingClientRect();
+  const dispW = rect.width  > 0 ? rect.width  : scanImg.offsetWidth;
+  const dispH = rect.height > 0 ? rect.height : scanImg.offsetHeight;
+  if(!dispW || !dispH) return;
 
-  const origW = CLASS_SCANS[person.classNum]?.[person.pageIndex]?.w || 3072;
-  const origH = CLASS_SCANS[person.classNum]?.[person.pageIndex]?.h || 4080;
+  const origW  = CLASS_SCANS[person.classNum]?.[person.pageIndex]?.w || 3072;
+  const origH  = CLASS_SCANS[person.classNum]?.[person.pageIndex]?.h || 4080;
   const scaleX = dispW / origW;
   const scaleY = dispH / origH;
 
+  // Canvas取得・サイズをimgに合わせる
+  let cvs = scanWrap.querySelector('.highlight-canvas');
+  if(!cvs) {
+    cvs = document.createElement('canvas');
+    cvs.className = 'highlight-canvas';
+    scanWrap.appendChild(cvs);
+  }
+  cvs.width  = dispW;
+  cvs.height = dispH;
+  cvs.style.width  = dispW + 'px';
+  cvs.style.height = dispH + 'px';
+
+  // 枠サイズの計算（人物中心座標±range）
   const range = person.type === 'teacher' ? 270 : 230;
   const ratio = person.type === 'teacher' ? 1.2 : 0.85;
   const boxW  = range * 2 * scaleX;
   const boxH  = range * 2 * ratio * scaleX;
+  const cx    = person.x * scaleX;  // 中心X（表示座標）
+  const cy    = person.y * scaleY;  // 中心Y（表示座標）
+  const x     = cx - boxW / 2;
+  const y     = cy - boxH / 2;
 
-  frameEl.style.width  = boxW + 'px';
-  frameEl.style.height = boxH + 'px';
-  frameEl.style.left   = (person.x * scaleX) + 'px';
-  frameEl.style.top    = (person.y * scaleY) + 'px';
-  frameEl.classList.add('on');
+  // Canvas描画
+  const ctx = cvs.getContext('2d');
+  ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+  // 外側グロー（ぼかし）
+  ctx.save();
+  ctx.shadowColor = 'rgba(255,102,0,0.85)';
+  ctx.shadowBlur  = 14;
+  ctx.strokeStyle = '#ff6600';
+  ctx.lineWidth   = 5;
+  ctx.lineJoin    = 'round';
+  ctx.strokeRect(x, y, boxW, boxH);
+  ctx.restore();
+
+  // くっきり枠を重ね描き
+  ctx.strokeStyle = '#ff6600';
+  ctx.lineWidth   = 4;
+  ctx.lineJoin    = 'round';
+  ctx.strokeRect(x, y, boxW, boxH);
 
   // 該当ピンにもactiveを付ける
-  if(pinsEl) {
-    pinsEl.querySelectorAll('.name-pin').forEach(pin => {
-      const label = pin.querySelector('.name-pin-label');
-      if(label && label.textContent === person.name) pin.classList.add('active');
-    });
-  }
+  pinsEl.querySelectorAll('.name-pin').forEach(pin => {
+    const label = pin.querySelector('.name-pin-label');
+    if(label && label.textContent === person.name) pin.classList.add('active');
+  });
 
-  // スクロールして枠が見えるようにする
-  frameEl.scrollIntoView({behavior:'smooth', block:'center'});
+  // 枠が画面内に来るようスクロール
+  cvs.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
 $('cpBack').addEventListener('click', () => {
@@ -1226,6 +1267,7 @@ document.querySelectorAll('.class-card').forEach(card => {
 // リサイズ時にピンを再配置
 window.addEventListener('resize', () => {
   if($('classPage').classList.contains('on')) {
+    clearHighlightCanvases();
     // 再描画
     document.querySelectorAll('.scan-img-wrap img').forEach((img, pi) => {
       if(img.complete && img.naturalWidth > 0) {
