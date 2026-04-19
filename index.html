@@ -1169,34 +1169,46 @@ function highlightPerson(person) {
   document.querySelectorAll('.name-pin').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.person-frame').forEach(f => f.classList.remove('on'));
 
-  // 該当ピンを探してハイライト枠を表示
-  document.querySelectorAll('.name-pin').forEach(pin => {
-    const label = pin.querySelector('.name-pin-label');
-    if(label && label.textContent === person.name) {
-      pin.classList.add('active');
-      // ピンの親(name-pins)にある枠要素を取得してサイズ・位置を設定
-      const pinsEl = pin.parentElement;
-      const frameEl = pinsEl.querySelector('.person-frame');
-      const scanImg = pinsEl.previousElementSibling; // img
-      if(frameEl && scanImg) {
-        const origW = parseInt(pin.dataset.origW) || CLASS_SCANS[person.classNum]?.[person.pageIndex]?.w || 3072;
-        const origH = parseInt(pin.dataset.origH) || CLASS_SCANS[person.classNum]?.[person.pageIndex]?.h || 4080;
-        const scaleX = scanImg.offsetWidth / origW;
-        const scaleY = scanImg.offsetHeight / origH;
-        const range = person.type === 'teacher' ? 270 : 230;
-        const ratio = person.type === 'teacher' ? 1.2 : 0.85;
-        const boxW = range * 2 * scaleX;
-        const boxH = range * 2 * ratio * scaleX;
-        frameEl.style.width  = boxW + 'px';
-        frameEl.style.height = boxH + 'px';
-        frameEl.style.left   = (person.x * scaleX) + 'px';
-        frameEl.style.top    = (person.y * scaleY) + 'px';
-        frameEl.classList.add('on');
-      }
-      // スクロールして見えるようにする
-      pin.scrollIntoView({behavior:'smooth', block:'center'});
-    }
-  });
+  // 対象のpageIndexのscanWrapを直接取得
+  const scanWrap = document.getElementById('scanWrap' + person.pageIndex);
+  const pinsEl   = document.getElementById('pins' + person.pageIndex);
+  if(!scanWrap || !pinsEl) return;
+
+  const scanImg  = scanWrap.querySelector('img');
+  const frameEl  = pinsEl.querySelector('.person-frame');
+  if(!scanImg || !frameEl) return;
+
+  // 画像の表示サイズを取得（offsetWidthが0なら getBoundingClientRect を使う）
+  const rect = scanImg.getBoundingClientRect();
+  const dispW = rect.width  || scanImg.offsetWidth  || 300;
+  const dispH = rect.height || scanImg.offsetHeight || 400;
+
+  const origW = CLASS_SCANS[person.classNum]?.[person.pageIndex]?.w || 3072;
+  const origH = CLASS_SCANS[person.classNum]?.[person.pageIndex]?.h || 4080;
+  const scaleX = dispW / origW;
+  const scaleY = dispH / origH;
+
+  const range = person.type === 'teacher' ? 270 : 230;
+  const ratio = person.type === 'teacher' ? 1.2 : 0.85;
+  const boxW  = range * 2 * scaleX;
+  const boxH  = range * 2 * ratio * scaleX;
+
+  frameEl.style.width  = boxW + 'px';
+  frameEl.style.height = boxH + 'px';
+  frameEl.style.left   = (person.x * scaleX) + 'px';
+  frameEl.style.top    = (person.y * scaleY) + 'px';
+  frameEl.classList.add('on');
+
+  // 該当ピンにもactiveを付ける
+  if(pinsEl) {
+    pinsEl.querySelectorAll('.name-pin').forEach(pin => {
+      const label = pin.querySelector('.name-pin-label');
+      if(label && label.textContent === person.name) pin.classList.add('active');
+    });
+  }
+
+  // スクロールして枠が見えるようにする
+  frameEl.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
 $('cpBack').addEventListener('click', () => {
