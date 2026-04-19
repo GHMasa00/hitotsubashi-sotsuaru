@@ -1031,7 +1031,7 @@ const CLASS_COORDS = {
 // ════════════════════════════════════════════════════════
 // クラスページ 表示ロジック
 // ════════════════════════════════════════════════════════
-function openClassPage(classNum) {
+function openClassPage(classNum, focusPerson) {
   const scans = CLASS_SCANS[classNum];
   const coords = CLASS_COORDS[classNum];
   if(!scans || !coords) return;
@@ -1058,6 +1058,18 @@ function openClassPage(classNum) {
 
   showScreen('classPage');
   $('classPage').scrollTop = 0;
+  // focusPersonがあれば少し待ってからズーム
+  if(focusPerson) {
+    setTimeout(() => {
+      const allPins = document.querySelectorAll('.name-pin');
+      allPins.forEach(pin => {
+        const label = pin.querySelector('.name-pin-label');
+        if(label && label.textContent === focusPerson.name) {
+          pin.click();
+        }
+      });
+    }, 800);
+  }
 }
 
 function attachPins(pi, origW, origH, pins) {
@@ -1463,6 +1475,62 @@ function setSt(t,m){
   [$('saveStatus'),$('saveStatus2')].forEach(el=>{if(el){el.className='save-s '+t;el.textContent=m;}});
 }
 
+
+// ════════════════════════════════════════════════════════
+// CLASS_COORDS 名前検索
+// ════════════════════════════════════════════════════════
+function searchClassCoords(q) {
+  // 全クラス・全ページから名前が一致する人を検索
+  const results = [];
+  if(!q) return results;
+  for(let cls=1; cls<=7; cls++){
+    const coords = CLASS_COORDS[cls];
+    if(!coords) continue;
+    ['page1','page2'].forEach((pageKey, pi) => {
+      (coords[pageKey]||[]).forEach(person => {
+        const name = person.name || '';
+        const nick = person.nick || '';
+        if(name.includes(q) || nick.includes(q)) {
+          results.push({ ...person, classNum: cls, pageIndex: pi });
+        }
+      });
+    });
+  }
+  return results;
+}
+
+function renderSearchResults(q) {
+  const grid = $('viewGrid');
+  grid.innerHTML = '';
+  const results = searchClassCoords(q);
+  if(!results.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-ic">🔍</div><div class="empty-t">「${q}」は見つかりませんでした</div></div>`;
+    return;
+  }
+  results.forEach((person, i) => {
+    const scan = CLASS_SCANS[person.classNum][person.pageIndex];
+    const imgUrl = `https://drive.google.com/thumbnail?id=${scan.fileId}&sz=w800`;
+    // ズーム用の計算（表示サイズが不明なのでスクリーン幅を使う）
+    const card = document.createElement('div');
+    card.className = 'photo-card';
+    card.style.animationDelay = `${Math.min(i, 0.15) * 0.04}s`;
+    card.innerHTML = `
+      <div class="img-wrap" style="background:#1a1208;">
+        <img src="${imgUrl}" alt="${person.name}" loading="lazy" style="object-fit:contain;">
+        <div class="type-badge">3年${person.classNum}組</div>
+      </div>
+      <div class="card-info">
+        <div class="c-name">${person.name}</div>
+        <div class="c-nick">${person.nick ? '「'+person.nick+'」' : ''}</div>
+      </div>`;
+    // タップするとそのクラスページを開いてその人にフォーカス
+    card.onclick = () => {
+      openClassPage(person.classNum, person);
+    };
+    grid.appendChild(card);
+  });
+}
+
 // ════════════════════════════════════════════════════════
 // 閲覧画面
 // ════════════════════════════════════════════════════════
@@ -1515,14 +1583,14 @@ $('viewSearch').oninput=()=>{
   const gridWrap=document.querySelector('.grid-wrap');
   if(q){
     classGrid.style.display='none';
-    viewTabs.style.display='flex';
+    viewTabs.style.display='none';
     gridWrap.style.display='block';
+    renderSearchResults(q);
   } else {
     classGrid.style.display='flex';
     viewTabs.style.display='none';
     gridWrap.style.display='none';
   }
-  renderViewGrid();
 };
 
 // 写真詳細
