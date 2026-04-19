@@ -173,6 +173,8 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 .name-pin:active .name-pin-dot{background:rgba(201,168,76,.6);}
 .name-pin-label{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:rgba(26,18,8,.88);color:var(--gold-l);font-size:.6rem;white-space:nowrap;padding:.2rem .45rem;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .15s;letter-spacing:.04em;}
 .name-pin:hover .name-pin-label,.name-pin.active .name-pin-label{opacity:1;}
+.name-pin-highlight{position:absolute;border:2.5px solid rgba(255,140,0,.9);border-radius:4px;pointer-events:none;transform:translate(-50%,-50%);box-shadow:0 0 0 1px rgba(0,0,0,.3);transition:opacity .2s;opacity:0;}
+.name-pin.active .name-pin-highlight{opacity:1;}
 
 /* ズームオーバーレイ */
 .zoom-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(10,7,2,.92);backdrop-filter:blur(8px);align-items:center;justify-content:center;}
@@ -1087,7 +1089,11 @@ function attachPins(pi, origW, origH, pins) {
     pin.className = 'name-pin';
     pin.style.left = (p.x * scaleX) + 'px';
     pin.style.top  = (p.y * scaleY) + 'px';
-    pin.innerHTML = `<div class="name-pin-dot"></div><div class="name-pin-label">${p.name}</div>`;
+    // ズーム範囲に対応するハイライト枠のサイズ（元画像のrange*2px → 表示スケール換算）
+    const range = p.type === 'teacher' ? 270 : 230;
+    const boxW = range * 2 * scaleX;
+    const boxH = range * 2 * (p.type === 'teacher' ? 1.2 : 0.85) * scaleX;
+    pin.innerHTML = `<div class="name-pin-dot"></div><div class="name-pin-label">${p.name}</div><div class="name-pin-highlight" style="width:${boxW}px;height:${boxH}px;"></div>`;
     pin.addEventListener('click', e => {
       e.stopPropagation();
       // 全ピンのactiveを外す
