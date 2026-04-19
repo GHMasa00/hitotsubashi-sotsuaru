@@ -314,7 +314,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 <!-- ════════════════════════════════════════
      画面1: セットアップ
 ════════════════════════════════════════ -->
-<div id="setupScreen" class="screen">
+<div id="setupScreen" class="screen" style="display:none!important">
   <div class="setup-logo">思い出<span>アルバム</span></div>
   <div class="setup-sub">初期設定 — はじめての方はこちらから</div>
   <div class="setup-card">
@@ -368,7 +368,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
   <div class="pw-hint">幹事の方は管理パスワードを入力すると管理画面に入れます</div>
   <div class="pw-line"></div>
   <div style="margin-top:1.2rem;text-align:center">
-    <button onclick="confirmReset()" style="display:block;width:100%;max-width:280px;background:rgba(139,111,71,.2);border:1px solid rgba(139,111,71,.4);color:rgba(200,180,140,.9);font-size:.9rem;cursor:pointer;font-family:'Noto Serif JP',serif;padding:.85rem 1.4rem;border-radius:8px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;margin:0 auto;">⚙ 初期設定をやり直す</button>
+    <!-- 初期設定ボタンは廃止（configはHTMLに直書き） -->
   </div>
 </div>
 
@@ -501,12 +501,12 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 <div class="menu-bg" id="viewMenuBg"></div>
 <div class="menu-sheet" id="viewMenuSheet" style="display:none">
   <div class="menu-drag"></div>
-  <button class="menu-item" id="mToAdmin">
-    <span class="menu-ic">🔑</span><span class="menu-lb">管理画面へ（幹事用）</span>
+  <button class="menu-item" id="mToAdmin" style="display:none">
+    <span class="menu-ic">📁</span><span class="menu-lb">写真管理画面へ</span>
   </button>
-  <div class="menu-sep"></div>
+  <div class="menu-sep" id="mToAdminSep" style="display:none"></div>
   <button class="menu-item" id="mSetupReset">
-    <span class="menu-ic">⚙️</span><span class="menu-lb">初期設定をやり直す</span>
+    <span class="menu-ic">⚙️</span><span class="menu-lb">データをリセット（管理者のみ）</span>
   </button>
 </div>
 
@@ -647,7 +647,14 @@ const SKEY_CMTS   = 'sotsuaru_v5_comments';
 
 // ── 状態 ────────────────────────────────────────────────
 let photos    = [];
-let config    = null;   // { schoolName, year, viewPw, adminPw }
+// ── アルバム設定（固定） ─────────────────────────────────
+const config = {
+  schoolName: '千代田区立一橋中学校',
+  year:        '1990年',
+  viewPw:      'Hitotsubashi1990',
+  adminPw:     'Check1990'
+};
+let isAdminLoggedIn = false;
 let comments  = {};     // { photoId: 'コメント文字列' }
 let editingId = null;
 let currentFilter   = 'all';
@@ -674,8 +681,32 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   $(id).classList.add('on');
   currentScreen = id;
-  $('viewNav').classList.toggle('on', id==='viewScreen');
-  $('adminNav').classList.toggle('on', id==='adminScreen');
+  $('viewNav').classList.toggle('on', id==='viewScreen' || id==='classPage');
+  // adminNavはviewScreen/classPage表示中かつ管理者ログイン時に表示
+  const onAlbum = (id==='viewScreen' || id==='classPage');
+  $('adminNav').classList.toggle('on', onAlbum && isAdminLoggedIn);
+}
+
+// 閲覧画面へのログイン共通処理
+function loginToViewScreen(){
+  showScreen('viewScreen');
+  $('viewSchoolLabel').textContent = `${config.schoolName}　${config.year}卒業`;
+  document.getElementById('viewTabs').style.display = 'none';
+  document.querySelector('.grid-wrap').style.display = 'none';
+  renderViewGrid();
+  initGAPIIfNeeded();
+  if(accessToken){ syncFromDrive(); }
+  else {
+    const waitAndSync = async () => {
+      let retries = 0;
+      while(!accessToken && retries < 30){
+        await new Promise(r=>setTimeout(r,500));
+        retries++;
+      }
+      if(accessToken) syncFromDrive();
+    };
+    waitAndSync();
+  }
 }
 
 
@@ -1238,8 +1269,8 @@ function openZoom(person, imgSrc, origW, origH, px, py, dispW, dispH) {
   $('zoomName').textContent = person.name;
   $('zoomNick').textContent = person.nick ? `「${person.nick}」` : '';
 
-  // 管理者モード（直前の画面がadminScreen）のときだけあだ名ボタンを表示
-  $('zoomAdminRow').style.display = (currentScreen === 'adminScreen') ? 'flex' : 'none';
+  // 管理者ログイン時のみあだ名ボタンを表示
+  $('zoomAdminRow').style.display = isAdminLoggedIn ? 'flex' : 'none';
   $('zoomNickEdit').style.display = 'none';
   $('zoomNickBtn').style.display  = 'inline-block';
   $('zoomNickInput').value = person.nick || '';
@@ -1527,19 +1558,17 @@ window.addEventListener('resize', () => {
 
 // ── 初期設定リセット（管理PW確認付き）────────────────────────
 function confirmReset(){
-  if(!config){
-    // configがない場合はそのままセットアップへ
-    showScreen('setupScreen');
-    return;
-  }
   const entered = prompt('管理パスワードを入力してください');
-  if(entered === null) return; // キャンセル
+  if(entered === null) return;
   if(entered === config.adminPw){
+    // localStorageキャッシュ・あだ名等をクリア
     localStorage.removeItem(SKEY_CONFIG);
-    config = null;
+    localStorage.removeItem(NICK_STORAGE_KEY);
+    isAdminLoggedIn = false;
     $('viewMenuBg')?.classList.remove('on');
     if($('viewMenuSheet')) $('viewMenuSheet').style.display='none';
-    showScreen('setupScreen');
+    showScreen('pwScreen');
+    $('pwSchoolName').textContent = `${config.schoolName}　${config.year}卒業`;
   } else {
     alert('管理パスワードが違います');
   }
@@ -1547,19 +1576,11 @@ function confirmReset(){
 
 // ── 起動処理 ─────────────────────────────────────────
 window.addEventListener('load', ()=>{
-  config   = loadConfig();
   comments = loadComments();
   loadCache();
-
-  if(!config){
-    // ローカルに設定がない → セットアップ画面へ
-    showScreen('setupScreen');
-    initGAPI();
-  } else {
-    showScreen('pwScreen');
-    $('pwSchoolName').textContent = `${config.schoolName}　${config.year}卒業`;
-    initGAPI();
-  }
+  showScreen('pwScreen');
+  $('pwSchoolName').textContent = `${config.schoolName}　${config.year}卒業`;
+  initGAPI();
 });
 
 // ════════════════════════════════════════════════════════
@@ -1611,33 +1632,13 @@ $('pwEnterBtn').onclick = $('pwInput').onkeydown = function(e){
   const v = $('pwInput').value.trim();
   if(v === config?.adminPw){
     $('pwInput').value = '';
-    showScreen('adminScreen');
-    $('adminSchoolLabel').textContent = `${config.schoolName} ${config.year}`;
+    isAdminLoggedIn = true;
+    loginToViewScreen();
     renderAdminGrid();
-    initGAPIIfNeeded();
   } else if(v === config?.viewPw){
     $('pwInput').value = '';
-    showScreen('viewScreen');
-    $('viewSchoolLabel').textContent = `${config.schoolName}　${config.year}卒業`;
-    // 初期状態：クラスグリッドのみ表示
-    document.getElementById('viewTabs').style.display = 'none';
-    document.querySelector('.grid-wrap').style.display = 'none';
-    renderViewGrid();
-    initGAPIIfNeeded();
-    // 閲覧ログイン後にDriveから写真を自動同期
-    if(accessToken){ syncFromDrive(); }
-    else {
-      // GAPIが準備できたら自動同期
-      const waitAndSync = async () => {
-        let retries = 0;
-        while(!accessToken && retries < 30){ 
-          await new Promise(r=>setTimeout(r,500)); 
-          retries++; 
-        }
-        if(accessToken) syncFromDrive();
-      };
-      waitAndSync();
-    }
+    isAdminLoggedIn = false;
+    loginToViewScreen();
   } else {
     const el=$('pwInput');
     el.classList.add('err');
@@ -1662,7 +1663,7 @@ function initGAPI(){
     callback: async(r)=>{
       if(r.error){
         setDrive('ng','Google認証失敗');
-        if(!config && $('pwScreen').classList.contains('on')) showScreen('setupScreen');
+        if(!config && $('pwScreen').classList.contains('on')) showScreen('pwScreen');
         return;
       }
       accessToken = r.access_token;
@@ -1676,18 +1677,8 @@ function initGAPI(){
       // パスワード画面でconfigがない場合 → DriveからConfig読み込み
       if($('pwScreen').classList.contains('on') && !config){
         load('設定を読み込み中...');
-        try{
-          const cfgId = await findFile(CONFIG_FILE);
-          if(cfgId){
-            const raw = await dlFile(cfgId);
-            config = JSON.parse(raw);
-            saveConfig(config);
-            $('pwSchoolName').textContent = config.schoolName + '　' + config.year + '卒業';
-          } else {
-            showScreen('setupScreen');
-          }
-        }catch(e){ showScreen('setupScreen'); }
-        finally{ unload(); }
+        // config は HTML に直書きなので Drive からの読み込み不要
+        unload();
       }
     },
   });
@@ -2013,9 +2004,17 @@ $('navViewMenu').onclick=()=>{$('viewMenuBg').classList.add('on');$('viewMenuShe
 $('viewMenuBg').onclick=()=>{$('viewMenuBg').classList.remove('on');$('viewMenuSheet').style.display='none';};
 $('mToAdmin').onclick=()=>{
   $('viewMenuBg').classList.remove('on');$('viewMenuSheet').style.display='none';
-  showScreen('pwScreen');$('pwSchoolName').textContent=`${config.schoolName}　${config.year}卒業`;
+  showScreen('adminScreen');
+  $('adminSchoolLabel').textContent = `${config.schoolName} ${config.year}`;
+  renderAdminGrid();
 };
 $('mSetupReset').onclick=()=>{ confirmReset(); };
+
+// 閲覧メニュー表示時に管理者ボタンの表示/非表示を制御
+$('navViewMenu').addEventListener('click', ()=>{
+  $('mToAdmin').style.display    = isAdminLoggedIn ? 'flex' : 'none';
+  $('mToAdminSep').style.display = isAdminLoggedIn ? 'block' : 'none';
+}, true);
 
 // ════════════════════════════════════════════════════════
 // 管理画面
