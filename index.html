@@ -538,44 +538,10 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 
 <!-- 管理用ボトムナビ -->
 <nav class="bottom-nav" id="adminNav">
-  <button class="nav-item" id="navAdd">
-    <span class="nav-ic">➕</span><span class="nav-lb">写真を追加</span>
-  </button>
-  <button class="nav-item" id="navSync">
-    <span class="nav-ic">🔄</span><span class="nav-lb">Drive同期</span>
-  </button>
-  <button class="nav-item" id="navImportXlsx">
-    <span class="nav-ic">📊</span><span class="nav-lb">Excel取込</span>
-  </button>
-  <button class="nav-item" id="navAdminMenu">
-    <span class="nav-ic">☰</span><span class="nav-lb">メニュー</span>
+  <button class="nav-item" id="navAddEvent">
+    <span class="nav-ic">➕</span><span class="nav-lb">イベントを追加</span>
   </button>
 </nav>
-<input type="file" id="fileInput" multiple accept="image/*" style="display:none">
-<input type="file" id="xlsxInput" accept=".xlsx,.xls" style="display:none">
-
-<!-- 管理メニューシート -->
-<div class="menu-bg" id="adminMenuBg"></div>
-<div class="menu-sheet" id="adminMenuSheet" style="display:none">
-  <div class="menu-drag"></div>
-  <div class="menu-status"><span class="save-s" id="saveStatus2"></span></div>
-  <div class="menu-sep"></div>
-  <button class="menu-item" id="mExport">
-    <span class="menu-ic">💾</span><span class="menu-lb">バックアップ（JSON）</span>
-  </button>
-  <button class="menu-item" id="mImport">
-    <span class="menu-ic">📂</span><span class="menu-lb">復元（JSON）</span>
-  </button>
-  <div class="menu-sep"></div>
-  <button class="menu-item" id="mToView">
-    <span class="menu-ic">👁</span><span class="menu-lb">閲覧画面に戻る</span>
-  </button>
-  <div class="menu-sep"></div>
-  <button class="menu-item" id="mClearAll">
-    <span class="menu-ic">🗑</span><span class="menu-lb dng">全データ削除</span>
-  </button>
-</div>
-<input type="file" id="importInput" accept=".json" style="display:none">
 
 <!-- 編集モーダル（管理画面） -->
 <div class="modal-bg" id="editModal">
@@ -1768,10 +1734,6 @@ async function uploadPhoto(dataUrl, name){
 }
 
 // ── Drive同期 ─────────────────────────────────────────
-$('navSync').onclick = ()=>{
-  if(!accessToken) tokenClient?.requestAccessToken({prompt:'consent'});
-  else syncFromDrive();
-};
 async function syncFromDrive(){
   load('Google Driveと同期中...');
   try{
@@ -2078,107 +2040,8 @@ $('adminTabs').querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
   renderAdminGrid();
 });
 
-// 写真追加
-$('navAdd').onclick=()=>$('fileInput').click();
-$('fileInput').onchange=e=>handleFiles(e.target.files);
-async function handleFiles(files){
-  for(const f of Array.from(files)){
-    if(!f.type.startsWith('image/'))continue;
-    load(`アップロード中: ${f.name}`);
-    const url=await toDataUrl(f);
-    const did=accessToken?await uploadPhoto(url,f.name):null;
-    photos.push({id:'lc_'+Date.now()+Math.random(),name:'',nick:'',cls:'',cmt:'',type:'graduation',driveId:did,drvName:f.name,url,edited:null});
-    saveCache();renderAdminGrid();
-  }
-  unload();
-}
-function toDataUrl(f){return new Promise((r,j)=>{const x=new FileReader();x.onload=e=>r(e.target.result);x.onerror=j;x.readAsDataURL(f);});}
-
-// ── Excel インポート ───────────────────────────────────
-$('navImportXlsx').onclick=()=>$('xlsxInput').click();
-$('xlsxInput').onchange=async e=>{
-  const f=e.target.files[0];if(!f)return;
-  load('Excelを読み込み中...');
-  try{
-    const buf=await f.arrayBuffer();
-    if(!window.XLSX){
-      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
-    }
-    const wb=XLSX.read(buf,{type:'array'});
-
-    // ── あだ名入力シート形式（シート名「3年X組」）の判定 ──
-    const isNickSheet = wb.SheetNames.some(n => /^3年\d+組$/.test(n));
-
-    if(isNickSheet){
-      // あだ名入力シート.xlsx → CLASS_COORDSのnickを更新
-      let updated = 0;
-      // 既存オーバーライドをlocalStorageから読み込んでマージ
-      let overrides = {};
-      try { overrides = JSON.parse(localStorage.getItem(NICK_STORAGE_KEY)||'{}'); } catch(e){}
-
-      for(const sheetName of wb.SheetNames){
-        const m = sheetName.match(/^3年(\d+)組$/);
-        if(!m) continue;
-        const cls = parseInt(m[1]);
-        const ws = wb.Sheets[sheetName];
-        const rows = XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-        for(const row of rows){
-          const name = String(row[2]||'').trim();
-          const nick = String(row[3]||'').trim();
-          if(!name || name === '名前') continue; // ヘッダー行スキップ
-          const key = `${cls}_${name}`;
-          if(nick){
-            overrides[key] = nick;
-          } else {
-            // あだ名が空欄の場合は既存エントリを削除
-            delete overrides[key];
-          }
-          // CLASS_COORDSのpersonに即時反映
-          const coords = CLASS_COORDS[cls];
-          if(coords){
-            for(const page of Object.values(coords)){
-              const person = page.find(p => p.name === name);
-              if(person){ person.nick = nick; updated++; break; }
-            }
-          }
-        }
-      }
-      saveNickOverrides(overrides);
-      const nickCount = Object.keys(overrides).length;
-      showToast(`あだ名を${nickCount}件反映しました（空欄はクリア）`);
-
-    } else {
-      // 従来形式：「あだ名マスター」シート
-      const ws=wb.Sheets['あだ名マスター'];
-      if(!ws){alert('「あだ名マスター」シートまたは「3年X組」シートが見つかりません');unload();return;}
-      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-      let imported=0;
-      for(const row of rows){
-        const no=row[0];
-        if(typeof no!=='number')continue;
-        const cls    = String(row[1]||'').trim();
-        const name   = String(row[2]||'').trim();
-        const nick   = String(row[3]||'').trim();
-        const phPath = String(row[5]||'').trim();
-        if(!name)continue;
-        const existing=photos.find(p=>p.name===name || (phPath && p.drvName===phPath.split('/').pop()));
-        if(existing){
-          if(name)  existing.name=name;
-          if(nick)  existing.nick=nick;
-          if(cls)   existing.cls=cls;
-        } else {
-          photos.push({id:'xl_'+Date.now()+Math.random(),name,nick,cls,cmt:'',type:'graduation',driveId:null,drvName:phPath.split('/').pop()||'',url:null,edited:null});
-        }
-        imported++;
-      }
-      saveCache();renderAdminGrid();renderViewGrid();
-      showToast(`${imported}件をインポートしました`);
-    }
-
-  }catch(err){console.error(err);alert('Excelの読み込みに失敗しました: '+err.message);}
-  finally{unload();e.target.value='';}
-};
-function loadScript(src){return new Promise((r,j)=>{const s=document.createElement('script');s.src=src;s.onload=r;s.onerror=j;document.head.appendChild(s);});}
+// イベントを追加（今後実装）
+$('navAddEvent').onclick=()=>{ showToast('イベント追加機能は近日公開予定です'); };
 
 // ── Canvas / Blur ──────────────────────────────────────
 function initCanvas(src){
@@ -2276,43 +2139,6 @@ $('delBtn').onclick=()=>{
   if(confirm('この写真を削除しますか？')){
     photos=photos.filter(x=>String(x.id)!==String(editingId));
     closeEdit();saveCache();renderAdminGrid();renderViewGrid();
-  }
-};
-
-// 管理メニュー
-$('navAdminMenu').onclick=()=>{$('adminMenuBg').classList.add('on');$('adminMenuSheet').style.display='block';};
-$('adminMenuBg').onclick=()=>{$('adminMenuBg').classList.remove('on');$('adminMenuSheet').style.display='none';};
-function closeAdminMenu(){$('adminMenuBg').classList.remove('on');$('adminMenuSheet').style.display='none';}
-$('mExport').onclick=()=>{
-  closeAdminMenu();
-  if(!photos.length){alert('写真がありません');return;}
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([JSON.stringify({version:5,photos},null,2)],{type:'application/json'}));
-  a.download=`sotsuaru_backup_${new Date().toISOString().slice(0,10)}.json`;
-  a.click();setSt('saved','✓ バックアップ完了');
-};
-$('mImport').onclick=()=>{closeAdminMenu();$('importInput').click();};
-$('importInput').onchange=e=>{
-  const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=ev=>{
-    try{
-      const d=JSON.parse(ev.target.result);
-      const imp=d.photos||d;if(!Array.isArray(imp))throw 0;
-      const merge=photos.length>0?confirm(`現在${photos.length}件あります。\n[OK]追加 [キャンセル]上書き`):false;
-      photos=merge?[...photos,...imp]:imp;
-      saveCache();renderAdminGrid();renderViewGrid();setSt('saved',`✓ ${imp.length}件 復元完了`);
-    }catch{alert('読み込みに失敗しました。');}
-  };
-  r.readAsText(f);e.target.value='';
-};
-$('mToView').onclick=()=>{closeAdminMenu();showScreen('viewScreen');renderViewGrid();};
-$('mClearAll').onclick=()=>{
-  closeAdminMenu();
-  if(!photos.length)return;
-  if(confirm(`全${photos.length}件を削除しますか？（Driveのファイルは削除されません）`)){
-    photos=[];localStorage.removeItem(SKEY_DATA);setSt('saved','削除しました');
-    renderAdminGrid();renderViewGrid();
   }
 };
 
