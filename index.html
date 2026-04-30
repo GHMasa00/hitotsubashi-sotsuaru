@@ -145,7 +145,12 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 .type-badge{position:absolute;top:5px;left:5px;background:rgba(26,18,8,.72);border-radius:3px;font-size:.58rem;padding:.12rem .32rem;color:var(--gold-l);backdrop-filter:blur(3px);}
 .card-info{padding:.5rem .55rem .6rem;border-top:1px solid rgba(139,111,71,.12);}
 .c-name{font-family:'Shippori Mincho',serif;font-size:.88rem;font-weight:600;color:var(--sepia-d);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.c-nick{font-size:.7rem;color:var(--sepia);margin-top:.1rem;min-height:.9em;}
+.c-nick{font-size:.7rem;color:var(--sepia);margin-top:.1rem;min-height:.9em;display:flex;flex-wrap:wrap;gap:.2rem;}
+.c-yomi{font-size:.65rem;color:var(--faded);margin-top:.05rem;}
+.nick-badge{display:inline-block;background:rgba(139,111,71,.12);border:1px solid rgba(139,111,71,.25);border-radius:10px;padding:.05rem .4rem;font-size:.68rem;color:var(--sepia);}
+.zoom-nick-badges{display:flex;flex-wrap:wrap;gap:.3rem;justify-content:center;margin-bottom:.2rem;}
+.zoom-nick-badge{background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.35);border-radius:12px;padding:.15rem .6rem;font-size:.82rem;color:var(--gold-l);}
+.detail-nick-badges{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.15rem;}
 .c-cmt{font-size:.67rem;color:var(--faded);line-height:1.45;margin-top:.15rem;font-style:italic;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:1.9em;}
 .empty{padding:3rem 1.5rem;text-align:center;color:var(--faded);}
 .empty-ic{font-size:3rem;opacity:.28;margin-bottom:.8rem;}
@@ -381,7 +386,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
     <p id="viewSchoolLabel"></p>
   </div>
   <div class="search-bar">
-    <input id="viewSearch" type="search" placeholder="🔍 名前・あだ名で検索" autocomplete="off">
+    <input id="viewSearch" type="search" placeholder="🔍 名前・ふりがな・あだ名で検索" autocomplete="off">
   </div>
   <div class="class-grid" id="classGrid">
     <div class="class-card" data-class="1">
@@ -443,7 +448,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
     <span class="cp-title" id="cpTitle">3年1組</span>
   </div>
   <div class="cp-search-bar">
-    <input id="cpSearch" type="search" placeholder="🔍 名前で検索" autocomplete="off">
+    <input id="cpSearch" type="search" placeholder="🔍 名前・ふりがな・あだ名で検索" autocomplete="off">
   </div>
   <div class="cp-body" id="cpBody">
     <!-- スキャン画像2枚 + 名前タップでズーム -->
@@ -455,11 +460,13 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
   <div class="zoom-inner" id="zoomInner">
     <div class="zoom-img-wrap" id="zoomImgWrap"></div>
     <div class="zoom-name" id="zoomName"></div>
-    <div class="zoom-nick" id="zoomNick"></div>
+    <div class="c-yomi" id="zoomYomi" style="text-align:center;font-size:.75rem;color:var(--faded);margin-bottom:.1rem;"></div>
+    <div class="zoom-nick-badges" id="zoomNickBadges"></div>
+    <div class="zoom-nick" id="zoomNick" style="display:none;"></div>
     <div class="zoom-admin-row" id="zoomAdminRow" style="display:none">
       <button class="zoom-nick-btn" id="zoomNickBtn">✏️ あだ名</button>
       <div class="zoom-nick-edit" id="zoomNickEdit" style="display:none">
-        <input class="zoom-nick-input" id="zoomNickInput" type="text" placeholder="あだ名を入力" maxlength="20">
+        <input class="zoom-nick-input" id="zoomNickInput" type="text" placeholder="例：はなちゃん,はな" maxlength="60" style="width:190px;">
         <button class="zoom-nick-save" id="zoomNickSave">保存</button>
         <button class="zoom-nick-cancel" id="zoomNickCancel">×</button>
       </div>
@@ -567,7 +574,8 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
         </div>
       </div>
       <div class="fg"><label class="fl">お名前（旧姓可）</label><input class="fi" id="nameIn" type="text" placeholder="例：田中 花子" autocomplete="off"></div>
-      <div class="fg"><label class="fl">あだ名・ニックネーム</label><input class="fi" id="nickIn" type="text" placeholder="例：はなちゃん" autocomplete="off"></div>
+      <div class="fg"><label class="fl">ふりがな</label><input class="fi" id="yomiIn" type="text" placeholder="例：たなか はなこ" autocomplete="off"></div>
+      <div class="fg"><label class="fl">あだ名・ニックネーム（複数はカンマ区切り）</label><input class="fi" id="nickIn" type="text" placeholder="例：はなちゃん,はな" autocomplete="off"></div>
       <div class="fg"><label class="fl">クラス</label><input class="fi" id="classIn" type="text" placeholder="例：3年1組" autocomplete="off"></div>
       <div class="fg"><label class="fl">ひとこと・思い出</label><textarea class="ft" id="cmtIn" placeholder="例：いつも明るくてクラスの元気印でした。"></textarea></div>
     </div>
@@ -733,6 +741,7 @@ async function fetchNicksFromSheet() {
       for(const row of rows) {
         const name = row[2] || '';
         const nick = row[3] || '';
+        const yomi = row[4] || ''; // E列：ふりがな
         if(!name || name === '名前') continue; // ヘッダースキップ
         const key = `${cls}_${name}`;
         if(nick) overrides[key] = nick;
@@ -741,7 +750,7 @@ async function fetchNicksFromSheet() {
         if(coords) {
           for(const page of Object.values(coords)) {
             const person = page.find(p => p.name === name);
-            if(person) { person.nick = nick; totalUpdated++; break; }
+            if(person) { person.nick = nick; if(yomi) person.yomi = yomi; totalUpdated++; break; }
           }
         }
       }
@@ -1235,13 +1244,21 @@ function openZoom(person, imgSrc, origW, origH, px, py, dispW, dispH) {
   wrap.style.height = dispHPx + 'px';
   wrap.innerHTML = `<div class="zoom-bg" style="width:100%;height:100%;background-image:url('${imgSrc}');background-size:${bgSize};background-position:${bgPos};background-repeat:no-repeat;"></div>`;
   $('zoomName').textContent = person.name;
-  $('zoomNick').textContent = person.nick ? `「${person.nick}」` : '';
+  // ふりがな
+  const _yomiEl = document.getElementById('zoomYomi');
+  if(_yomiEl) _yomiEl.textContent = person.yomi || '';
+  // あだ名バッジ
+  const _badgesEl = document.getElementById('zoomNickBadges');
+  if(_badgesEl) {
+    const _nicks = (person.nick||'').split(',').map(n=>n.trim()).filter(Boolean);
+    _badgesEl.innerHTML = _nicks.map(n=>`<span class="zoom-nick-badge">「${n}」</span>`).join('');
+  }
 
   // 管理者ログイン時のみあだ名ボタンを表示
   $('zoomAdminRow').style.display = isAdminLoggedIn ? 'flex' : 'none';
   $('zoomNickEdit').style.display = 'none';
   $('zoomNickBtn').style.display  = 'inline-block';
-  $('zoomNickInput').value = person.nick || '';
+  $('zoomNickInput').value = person.nick || ''; // カンマ区切りで複数
   $('zoomOverlay').classList.add('on');
 }
 
@@ -1277,7 +1294,12 @@ $('zoomNickSave').addEventListener('click', async e => {
 
   // CLASS_COORDSに即時反映
   person.nick = nick;
-  $('zoomNick').textContent = nick ? `「${nick}」` : '';
+  // あだ名バッジ更新
+  const _sb = document.getElementById('zoomNickBadges');
+  if(_sb) {
+    const _sn = nick.split(',').map(n=>n.trim()).filter(Boolean);
+    _sb.innerHTML = _sn.map(n=>`<span class="zoom-nick-badge">「${n}」</span>`).join('');
+  }
   $('zoomNickEdit').style.display = 'none';
   $('zoomNickBtn').style.display  = 'inline-block';
 
@@ -1314,7 +1336,7 @@ async function writeNickToSheet(person, nick) {
   const spreadsheetId = NICK_SHEET_ID;
 
   // シートデータ取得（シート名全体をシングルクォートで囲んでエンコード）
-  const getUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent("'" + sheetName + "'!A:D")}`;
+  const getUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent("'" + sheetName + "'!A:E")}`; // E列=ふりがなも取得
   const getRes = await fetch(getUrl, {
     headers: { 'Authorization': 'Bearer ' + accessToken }
   });
@@ -1818,7 +1840,8 @@ function searchClassCoords(q) {
       (coords[pageKey]||[]).forEach(person => {
         const name = person.name || '';
         const nick = person.nick || '';
-        if(name.includes(q) || nick.includes(q)) {
+        const yomi = person.yomi || '';
+        if(name.includes(q) || nick.includes(q) || yomi.includes(q)) {
           results.push({ ...person, classNum: cls, pageIndex: pi });
         }
       });
@@ -1849,7 +1872,8 @@ function renderSearchResults(q) {
       </div>
       <div class="card-info">
         <div class="c-name">${person.name}</div>
-        <div class="c-nick">${person.nick ? '「'+person.nick+'」' : ''}</div>
+        <div class="c-nick">${(person.nick||'').split(',').map(n=>n.trim()).filter(Boolean).map(n=>`<span class='nick-badge'>「${n}」</span>`).join('')}</div>
+        <div class="c-yomi">${person.yomi||''}</div>
       </div>`;
     // タップするとそのクラスページを開いてその人にフォーカス
     card.onclick = () => {
@@ -1889,7 +1913,8 @@ function renderViewGrid(){
       </div>
       <div class="card-info">
         <div class="c-name">${p.name||'（未登録）'}</div>
-        <div class="c-nick">${p.nick?'「'+p.nick+'」':''}</div>
+        <div class="c-nick">${(p.nick||'').split(',').map(n=>n.trim()).filter(Boolean).map(n=>`<span class='nick-badge'>「${n}」</span>`).join('')}</div>
+        <div class="c-yomi">${p.yomi||''}</div>
         <div class="c-cmt">${p.cmt||''}</div>
       </div>`;
     card.onclick=()=>openDetail(p.id);
@@ -1928,7 +1953,12 @@ function openDetail(id){
   $('detailImg').src=p.edited||p.url||'';
   $('detailTitle').textContent=p.name||'（未登録）';
   $('detailName').textContent=p.name||'（未登録）';
-  $('detailNick').textContent=p.nick?`あだ名：「${p.nick}」`:'';
+  // あだ名バッジ（詳細モーダル）
+  const _dn = $('detailNick');
+  const _dnicks = (p.nick||'').split(',').map(n=>n.trim()).filter(Boolean);
+  if(_dnicks.length) {
+    _dn.innerHTML = 'あだ名：' + _dnicks.map(n=>`<span class="nick-badge" style="font-size:.8rem;">「${n}」</span>`).join(' ');
+  } else { _dn.textContent=''; }
   $('detailClass').textContent=p.cls?`${p.cls}　${p.type==='current'?'🙂 現在の写真':'📚 卒業当時'}`:p.type==='current'?'🙂 現在の写真':'📚 卒業当時';
   if(p.cmt){$('detailCmt').textContent=p.cmt;$('detailCmtArea').style.display='';}
   else $('detailCmtArea').style.display='none';
@@ -1953,7 +1983,8 @@ function showSlide(idx){
   const p=l[ssIdx];
   $('ssImg').src=p.edited||p.url||'';
   $('ssName').textContent=p.name||'（未登録）';
-  $('ssNick').textContent=p.nick?`「${p.nick}」`:'';
+  const _snicks = (p.nick||'').split(',').map(n=>n.trim()).filter(Boolean);
+  $('ssNick').textContent = _snicks.length ? _snicks.map(n=>`「${n}」`).join(' ') : '';
   $('ssCmt').textContent=p.cmt||comments[p.id]||'';
   $('ssCnt').textContent=`${ssIdx+1} / ${l.length}`;
 }
@@ -2025,7 +2056,8 @@ function renderAdminGrid(){
       </div>
       <div class="card-info">
         <div class="c-name">${p.name||'（未登録）'}</div>
-        <div class="c-nick">${p.nick?'「'+p.nick+'」':''}</div>
+        <div class="c-nick">${(p.nick||'').split(',').map(n=>n.trim()).filter(Boolean).map(n=>`<span class='nick-badge'>「${n}」</span>`).join('')}</div>
+        <div class="c-yomi">${p.yomi||''}</div>
       </div>`;
     card.onclick=()=>openEdit(p.id);
     grid.appendChild(card);
@@ -2109,6 +2141,7 @@ function openEdit(id){
   editingId=id;
   const p=photos.find(x=>String(x.id)===String(id));if(!p)return;
   $('nameIn').value=p.name||'';
+  $('yomiIn').value=p.yomi||'';
   $('nickIn').value=p.nick||'';
   $('classIn').value=p.cls||'';
   $('cmtIn').value=p.cmt||'';
@@ -2128,6 +2161,7 @@ $('editModal').onclick=e=>{if(e.target===$('editModal'))closeEdit();};
 $('editSave').onclick=()=>{
   const p=photos.find(x=>String(x.id)===String(editingId));if(!p)return;
   p.name=$('nameIn').value.trim();
+  p.yomi=$('yomiIn').value.trim();
   p.nick=$('nickIn').value.trim();
   p.cls=$('classIn').value.trim();
   p.cmt=$('cmtIn').value.trim();
