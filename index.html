@@ -724,6 +724,32 @@ function saveNickOverrides(overrides) {
 loadNickOverrides();
 
 // ── スプレッドシートからあだ名を自動取得（閲覧者含む全デバイス対応） ──
+// RFC4180準拠CSVパーサー（カンマ・ダブルクォート・改行対応）
+function parseCSV(text) {
+  const rows = [];
+  let row = [], col = '', inQ = false, i = 0;
+  while(i < text.length) {
+    const c = text[i];
+    if(inQ) {
+      if(c === '"' && text[i+1] === '"') { col += '"'; i += 2; }
+      else if(c === '"') { inQ = false; i++; }
+      else { col += c; i++; }
+    } else {
+      if(c === '"') { inQ = true; i++; }
+      else if(c === ',') { row.push(col.trim()); col = ''; i++; }
+      else if(c === '
+' && text[i+1] === '
+') { row.push(col.trim()); rows.push(row); row = []; col = ''; i += 2; }
+      else if(c === '
+' || c === '
+') { row.push(col.trim()); rows.push(row); row = []; col = ''; i++; }
+      else { col += c; i++; }
+    }
+  }
+  if(col || row.length) { row.push(col.trim()); rows.push(row); }
+  return rows;
+}
+
 async function fetchNicksFromSheet() {
   const classNums = [1,2,3,4,5,6,7];
   const overrides = {};
@@ -735,9 +761,8 @@ async function fetchNicksFromSheet() {
       const res = await fetch(url);
       if(!res.ok) continue;
       const text = await res.text();
-      const rows = text.trim().split('\n').map(r =>
-        r.split(',').map(c => c.replace(/^"|"$/g,'').trim())
-      );
+      // RFC4180準拠のCSVパース（カンマ・改行を含むセルに対応）
+      const rows = parseCSV(text);
       for(const row of rows) {
         const name = row[2] || '';
         const nick = row[3] || '';
