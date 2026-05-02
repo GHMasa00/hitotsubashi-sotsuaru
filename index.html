@@ -1182,9 +1182,9 @@ function openClassPage(classNum, focusPerson, focusPersons) {
   $('classPage').scrollTop = 0;
   // focusPersonがあれば画像ロード後にハイライト（複数対応）
   if(focusPersons && focusPersons.length > 0) {
-    setTimeout(() => highlightPersons(focusPersons), 900);
+    setTimeout(() => highlightPersons(focusPersons), 1500);
   } else if(focusPerson) {
-    setTimeout(() => highlightPersons([focusPerson]), 900);
+    setTimeout(() => highlightPersons([focusPerson]), 1500);
   }
 }
 
@@ -1455,7 +1455,7 @@ function highlightPersons(persons) {
   document.querySelectorAll('.name-pin').forEach(p => p.classList.remove('active'));
   clearHighlightCanvases();
 
-  // ページIndex別にグループ化（同じスキャン画像に複数人いる場合をまとめて描画）
+  // ページIndex別にグループ化
   const byPage = {};
   persons.forEach(person => {
     const key = person.pageIndex;
@@ -1463,7 +1463,7 @@ function highlightPersons(persons) {
     byPage[key].push(person);
   });
 
-  let firstCanvas = null;
+  let scrolled = false;
 
   Object.entries(byPage).forEach(([piStr, group]) => {
     const pi = parseInt(piStr);
@@ -1474,74 +1474,76 @@ function highlightPersons(persons) {
     const scanImg = scanWrap.querySelector('img');
     if(!scanImg) return;
 
-    const rect  = scanImg.getBoundingClientRect();
-    const dispW = rect.width  > 0 ? rect.width  : scanImg.offsetWidth;
-    const dispH = rect.height > 0 ? rect.height : scanImg.offsetHeight;
-    if(!dispW || !dispH) return;
+    const drawOnCanvas = () => {
+      const rect  = scanImg.getBoundingClientRect();
+      const dispW = rect.width  > 0 ? rect.width  : scanImg.offsetWidth;
+      const dispH = rect.height > 0 ? rect.height : scanImg.offsetHeight;
+      if(!dispW || !dispH) return;
 
-    // classNumはグループ内の最初の人から取得
-    const classNum = group[0].classNum;
-    const origW  = CLASS_SCANS[classNum]?.[pi]?.w || 3072;
-    const origH  = CLASS_SCANS[classNum]?.[pi]?.h || 4080;
-    const scaleX = dispW / origW;
-    const scaleY = dispH / origH;
+      const classNum = group[0].classNum;
+      const origW  = CLASS_SCANS[classNum]?.[pi]?.w || 3072;
+      const origH  = CLASS_SCANS[classNum]?.[pi]?.h || 4080;
+      const scaleX = dispW / origW;
+      const scaleY = dispH / origH;
 
-    // Canvas取得・サイズをimgに合わせる
-    let cvs = scanWrap.querySelector('.highlight-canvas');
-    if(!cvs) {
-      cvs = document.createElement('canvas');
-      cvs.className = 'highlight-canvas';
-      scanWrap.appendChild(cvs);
-    }
-    cvs.width  = dispW;
-    cvs.height = dispH;
-    cvs.style.width  = dispW + 'px';
-    cvs.style.height = dispH + 'px';
-
-    const ctx = cvs.getContext('2d');
-    ctx.clearRect(0, 0, cvs.width, cvs.height);
-
-    // グループ内の全員分を描画
-    group.forEach(person => {
-      const range = person.type === 'teacher' ? 270 : 230;
-      const ratio = person.type === 'teacher' ? 1.2 : 0.85;
-      const boxW  = range * 2 * scaleX;
-      const boxH  = range * 2 * ratio * scaleX;
-      const cx    = person.x * scaleX;
-      const cy    = person.y * scaleY;
-      const x     = cx - boxW / 2;
-      const y     = cy - boxH / 2;
-
-      // グロー
-      ctx.save();
-      ctx.shadowColor = 'rgba(255,102,0,0.85)';
-      ctx.shadowBlur  = 14;
-      ctx.strokeStyle = '#ff6600';
-      ctx.lineWidth   = 5;
-      ctx.lineJoin    = 'round';
-      ctx.strokeRect(x, y, boxW, boxH);
-      ctx.restore();
-
-      // くっきり枠
-      ctx.strokeStyle = '#ff6600';
-      ctx.lineWidth   = 4;
-      ctx.lineJoin    = 'round';
-      ctx.strokeRect(x, y, boxW, boxH);
-
-      // 該当ピンにactiveを付ける
-      if(pinsEl) {
-        pinsEl.querySelectorAll('.name-pin').forEach(pin => {
-          const label = pin.querySelector('.name-pin-label');
-          if(label && label.textContent === person.name) pin.classList.add('active');
-        });
+      let cvs = scanWrap.querySelector('.highlight-canvas');
+      if(!cvs) {
+        cvs = document.createElement('canvas');
+        cvs.className = 'highlight-canvas';
+        scanWrap.appendChild(cvs);
       }
-    });
+      cvs.width  = dispW;
+      cvs.height = dispH;
+      cvs.style.width  = dispW + 'px';
+      cvs.style.height = dispH + 'px';
 
-    if(!firstCanvas) firstCanvas = cvs;
+      const ctx = cvs.getContext('2d');
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+      group.forEach(person => {
+        const range = person.type === 'teacher' ? 270 : 230;
+        const ratio = person.type === 'teacher' ? 1.2 : 0.85;
+        const boxW  = range * 2 * scaleX;
+        const boxH  = range * 2 * ratio * scaleX;
+        const cx    = person.x * scaleX;
+        const cy    = person.y * scaleY;
+        const x     = cx - boxW / 2;
+        const y     = cy - boxH / 2;
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(255,102,0,0.85)';
+        ctx.shadowBlur  = 14;
+        ctx.strokeStyle = '#ff6600';
+        ctx.lineWidth   = 5;
+        ctx.lineJoin    = 'round';
+        ctx.strokeRect(x, y, boxW, boxH);
+        ctx.restore();
+
+        ctx.strokeStyle = '#ff6600';
+        ctx.lineWidth   = 4;
+        ctx.lineJoin    = 'round';
+        ctx.strokeRect(x, y, boxW, boxH);
+
+        if(pinsEl) {
+          pinsEl.querySelectorAll('.name-pin').forEach(pin => {
+            const label = pin.querySelector('.name-pin-label');
+            if(label && label.textContent === person.name) pin.classList.add('active');
+          });
+        }
+      });
+
+      if(!scrolled) {
+        scrolled = true;
+        cvs.scrollIntoView({behavior:'smooth', block:'center'});
+      }
+    };
+
+    if(scanImg.complete && scanImg.naturalWidth > 0) {
+      drawOnCanvas();
+    } else {
+      scanImg.addEventListener('load', drawOnCanvas, { once: true });
+    }
   });
-
-  // 最初のCanvasにスクロール
-  if(firstCanvas) firstCanvas.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
 // 後方互換用：単一人物の場合もhighlightPersonsに委譲
@@ -1883,7 +1885,7 @@ function renderSearchResults(q) {
     const scan = CLASS_SCANS[person.classNum][person.pageIndex];
     const imgUrl = `https://drive.google.com/thumbnail?id=${scan.fileId}&sz=w800`;
 
-    // openZoom と完全に同じ計算
+    // openZoom と完全に同じ計算（px指定のまま、CSSのscaleで縮小）
     const isTeacher = person.type === 'teacher';
     const range = isTeacher ? 270 : 230;
     const ratio = isTeacher ? 1.2 : 0.85;
@@ -1896,22 +1898,18 @@ function renderSearchResults(q) {
     const bgX = -(person.x * scale - dispWPx / 2);
     const bgY = -(person.y * scale - dispHPx / 2);
     const bgPos = `${bgX}px ${bgY}px`;
-    // カード幅は CSS grid で決まるが、アスペクト比を dispWPx:dispHPx に固定し
-    // background-size/position を 100%基準でスケールして渡す
-    // → カードが何px幅になっても比率で正しくクロップされる
-    const aspectRatio = `${dispWPx} / ${dispHPx}`;
-    // 100% 幅(= dispWPx相当)としてパーセント指定に変換
-    const bgSizePct = `${(origW * scale / dispWPx * 100).toFixed(2)}% ${(origH * scale / dispHPx * 100).toFixed(2)}%`;
-    const bgXPct = `${(bgX / (origW * scale - dispWPx) * 100).toFixed(2)}%`;
-    const bgYPct = `${(bgY / (origH * scale - dispHPx) * 100).toFixed(2)}%`;
-    const bgPosPct = `${bgXPct} ${bgYPct}`;
 
     const card = document.createElement('div');
     card.className = 'photo-card';
     card.style.animationDelay = `${Math.min(i, 0.15) * 0.04}s`;
+    // dispWPx×dispHPx の描画を CSS scale でカード幅に収める
+    // outer: overflow:hidden + aspect-ratio でカードサイズを決定
+    // inner: dispWPx×dispHPx で描画し、scale(var) で縮小
     card.innerHTML = `
-      <div class="img-wrap" style="background:#1a1208;aspect-ratio:${aspectRatio};position:relative;overflow:hidden;">
-        <div style="position:absolute;inset:0;background-image:url('${imgUrl}');background-size:${bgSizePct};background-position:${bgPosPct};background-repeat:no-repeat;"></div>
+      <div class="img-wrap" style="background:#1a1208;aspect-ratio:${dispWPx}/${dispHPx};position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;width:${dispWPx}px;height:${dispHPx}px;
+          background-image:url('${imgUrl}');background-size:${bgSize};background-position:${bgPos};background-repeat:no-repeat;
+          transform-origin:top left;transform:scale(var(--card-scale,1));"></div>
         <div class="type-badge">3年${person.classNum}組</div>
       </div>
       <div class="card-info">
@@ -1923,6 +1921,16 @@ function renderSearchResults(q) {
       openClassPage(person.classNum, person);
     };
     grid.appendChild(card);
+    // カード幅が確定してからscaleを設定
+    requestAnimationFrame(() => {
+      const wrap = card.querySelector('.img-wrap');
+      if(wrap) {
+        const cardW = wrap.offsetWidth || dispWPx;
+        const s = cardW / dispWPx;
+        const inner = wrap.querySelector('div');
+        if(inner) inner.style.transform = `scale(${s})`;
+      }
+    });
   });
 }
 
