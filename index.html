@@ -38,10 +38,7 @@ body{background:var(--bg);font-family:'Noto Serif JP',serif;color:var(--ink);}
 .btn:active{background:rgba(201,168,76,.15);}
 .btn.prim{background:var(--gold);border-color:var(--gold);color:var(--bg);font-weight:600;}
 .btn.prim:active{background:var(--gold-l);}
-.btn.dng{border-color:rgba(192,64,64,.4);color:var(--red);}
-.btn.dng:active{background:rgba(192,64,64,.1);}
 .btn.full{width:100%;justify-content:center;display:flex;align-items:center;gap:.5rem;}
-input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-size-adjust:100%;}
 
 /* ローディング */
 #loading{position:fixed;inset:0;z-index:900;background:rgba(10,7,2,.88);backdrop-filter:blur(6px);display:none;flex-direction:column;align-items:center;justify-content:center;gap:1rem;pointer-events:none;}
@@ -51,7 +48,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 .load-txt{color:var(--gold-l);font-size:.88rem;letter-spacing:.08em;}
 
 /* ═══════════════════════════════════════
-   画面: パスワード入力
+   画面2: パスワード入力
 ═══════════════════════════════════════ */
 #pwScreen{
   background:linear-gradient(160deg,var(--bg),var(--bg2) 60%,var(--bg3));
@@ -71,7 +68,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 #pwEnterBtn{background:var(--gold);border:none;border-radius:8px;padding:.85rem;color:var(--bg);font-family:'Shippori Mincho',serif;font-size:1rem;font-weight:600;letter-spacing:.15em;cursor:pointer;}
 
 /* ═══════════════════════════════════════
-   閲覧画面
+   画面3: 閲覧画面
 ═══════════════════════════════════════ */
 .sp-header{background:linear-gradient(180deg,var(--bg),var(--bg2));border-bottom:2px solid var(--gold);padding:1rem 1rem .75rem;padding-top:calc(1rem + var(--safe-t));text-align:center;position:relative;}
 .sp-header h1{font-family:'Shippori Mincho',serif;font-size:1.4rem;font-weight:800;color:var(--gold-l);letter-spacing:.2em;}
@@ -79,12 +76,14 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 #viewSearch{flex:1;background:rgba(245,240,232,.08);border:1px solid rgba(201,168,76,.25);border-radius:20px;padding:.5rem .9rem;color:var(--cream);outline:none;}
 
 .class-grid{display:flex;flex-direction:column;gap:.75rem;padding:.85rem .75rem 1.5rem;}
-.class-card{background:var(--warm);border-radius:8px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.45);cursor:pointer;}
-.class-thumb{position:relative;width:100%;aspect-ratio:3/2;background:#1a1208;}
-.class-thumb img{width:100%;height:100%;object-fit:contain;}
-.class-label{padding:.65rem .75rem;display:flex;align-items:center;justify-content:center;}
+.class-card{background:var(--warm);border-radius:8px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,0.45);cursor:pointer;transition:transform 0.1s;}
+.class-card:active{transform:scale(0.98);}
+.class-thumb{position:relative;width:100%;aspect-ratio:3/2;background:#1a1208;overflow:hidden;}
+.class-thumb img{width:100%;height:100%;object-fit:cover;filter:sepia(12%);}
+.class-label{padding:.65rem .75rem;display:flex;align-items:center;justify-content:center;border-top:1px solid rgba(139,111,71,0.1);}
 .class-name{font-family:'Shippori Mincho',serif;font-size:1rem;font-weight:600;color:var(--sepia-d);}
 
+/* 検索結果用 */
 .grid-wrap{padding:.75rem .6rem 7rem;}
 .photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;}
 .photo-card{background:var(--warm);border-radius:6px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.45);}
@@ -93,38 +92,32 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 .card-info{padding:.5rem .55rem .6rem;}
 .c-name{font-family:'Shippori Mincho',serif;font-size:.88rem;font-weight:600;color:var(--sepia-d);}
 .c-yomi{font-size:.65rem;color:var(--faded);margin-top:.05rem;}
-.nick-badge{display:inline-block;background:rgba(139,111,71,.12);border-radius:10px;padding:.05rem .4rem;font-size:.68rem;color:var(--sepia);margin-right:2px;}
 
 /* ═══════════════════════════════════════
-   クラスページ & ズーム
+   クラスページ & ズーム (省略なし)
 ═══════════════════════════════════════ */
 #classPage{background:var(--bg);min-height:100vh;}
 .cp-header{background:linear-gradient(180deg,var(--bg),var(--bg2));border-bottom:2px solid var(--gold);padding:.85rem 1rem;padding-top:calc(.85rem + var(--safe-t));display:flex;align-items:center;gap:.75rem;position:sticky;top:0;z-index:50;}
 .cp-back{background:none;border:none;color:var(--gold);font-size:1.3rem;cursor:pointer;}
-.cp-search-bar{background:var(--bg2);padding:.6rem .75rem;}
-.cp-search-bar input{width:100%;background:rgba(245,240,232,.08);border:1px solid rgba(201,168,76,.25);border-radius:20px;padding:.5rem .9rem;color:var(--cream);outline:none;}
-.scan-block{margin-bottom:1.5rem;}
-.scan-img-wrap{position:relative;width:100%;background:#1a1208;box-shadow:0 4px 16px rgba(0,0,0,.5);}
+.cp-body{padding:.75rem .6rem 5rem;}
+.scan-img-wrap{position:relative;width:100%;background:#1a1208;}
 .scan-img-wrap img{width:100%;height:auto;display:block;}
-.name-pins{position:absolute;inset:0;pointer-events:none;}
-.name-pin{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;}
-.name-pin-dot{width:40px;height:40px;border-radius:50%;}
+.name-pins{position:absolute;inset:0;}
+.name-pin{position:absolute;transform:translate(-50%,-50%);cursor:pointer;width:44px;height:44px;}
+.name-pin-dot{width:100%;height:100%;background:transparent;}
 .highlight-canvas{position:absolute;top:0;left:0;pointer-events:none;}
 
 .zoom-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(10,7,2,.92);backdrop-filter:blur(8px);align-items:center;justify-content:center;}
 .zoom-overlay.on{display:flex;}
 .zoom-inner{display:flex;flex-direction:column;align-items:center;gap:1rem;}
-.zoom-img-wrap{width:min(350px,85vw);aspect-ratio:0.85;border-radius:8px;overflow:hidden;background:#1a1208;}
+.zoom-img-wrap{width:min(350px,85vw);aspect-ratio:0.85;border-radius:8px;overflow:hidden;background:#1a1208;box-shadow:0 8px 40px rgba(0,0,0,0.7);}
 .zoom-name{font-family:'Shippori Mincho',serif;font-size:1.3rem;color:var(--gold-l);}
 .zoom-yomi{font-size:.8rem;color:var(--faded);}
 
 /* ボトムナビ */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:var(--bg2);border-top:1px solid rgba(201,168,76,.2);display:none;padding-bottom:var(--safe-b);}
 .bottom-nav.on{display:flex;}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:.55rem 0;color:rgba(160,144,112,.55);background:none;border:none;}
-
-/* トースト */
-#toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:rgba(42,31,14,.95);color:#e8d5a3;padding:.5rem 1.2rem;border-radius:20px;font-size:.8rem;z-index:999;opacity:0;transition:opacity .3s;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:.55rem 0;color:var(--gold-l);background:none;border:none;cursor:pointer;}
 
 ::-webkit-scrollbar{display:none;}
 </style>
@@ -137,7 +130,9 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 </div>
 
 <div id="pwScreen" class="screen on">
-  <div class="pw-crest"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaMAAAFACAYAAAARRRPY..." alt="校章" class="pw-crest-img"></div>
+  <div class="pw-crest">
+    <img src="data:image/png;base64,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" alt="校章" class="pw-crest-img">
+  </div>
   <div class="pw-line"></div>
   <div class="pw-logo">思い出<span>アルバム</span></div>
   <div id="pwSchoolName" class="pw-school"></div>
@@ -157,18 +152,8 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
     <input id="viewSearch" type="search" placeholder="🔍 名前・ふりがな・あだ名で検索">
   </div>
   <div class="class-grid" id="classGrid">
-    <script>
-      for(let i=1; i<=7; i++) {
-        document.write(`
-          <div class="class-card" onclick="openClassPage(${i})">
-            <div class="class-thumb"><div style="color:var(--gold);text-align:center;padding-top:20%;">📷 3年${i}組</div></div>
-            <div class="class-label"><span class="class-name">3年${i}組</span></div>
-          </div>
-        `);
-      }
-    </script>
-  </div>
-  <div class="grid-wrap" style="display:none">
+    </div>
+  <div class="grid-wrap" id="searchGridWrap" style="display:none">
     <div class="photo-grid" id="viewGrid"></div>
   </div>
 </div>
@@ -178,9 +163,6 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
     <button class="cp-back" onclick="showScreen('viewScreen')">‹ 戻る</button>
     <span class="cp-title" id="cpTitle"></span>
   </div>
-  <div class="cp-search-bar">
-    <input id="cpSearch" type="search" placeholder="🔍 このクラス内を検索（ふりがな可）">
-  </div>
   <div class="cp-body" id="cpBody"></div>
 </div>
 
@@ -189,7 +171,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
     <div class="zoom-img-wrap" id="zoomImgWrap"></div>
     <div class="zoom-name" id="zoomName"></div>
     <div class="zoom-yomi" id="zoomYomi"></div>
-    <div id="zoomNickBadges"></div>
+    <div id="zoomNickBadges" class="zoom-nick-badges"></div>
   </div>
 </div>
 
@@ -209,17 +191,48 @@ const config = {
   adminPw: 'Check1990'
 };
 
-let isAdminLoggedIn = false;
-let accessToken = null;
-
 const $ = id => document.getElementById(id);
+let isAdminLoggedIn = false;
 
-// ── 画面切り替え ────────────────────────────────────────
+// ── 画面制御 ──────────────────────────────────────────────
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
   $(id).classList.add('on');
   if(id === 'viewScreen') $('viewNav').classList.add('on');
   else $('viewNav').classList.remove('on');
+}
+
+// ── 初期化 ────────────────────────────────────────────────
+window.onload = () => {
+  $('pwSchoolName').textContent = `${config.schoolName} ${config.year}卒業`;
+  renderClassGrid();
+};
+
+function renderClassGrid() {
+  const grid = $('classGrid');
+  grid.innerHTML = '';
+  const classThumbIds = {
+    1: '1zEbEPKEHiE3jBNefNAuAiyr2ggDZr-eo',
+    2: '1ZVk27Weatz7IcsEu-K7tB5UhINk8X10-',
+    3: '1tBXYgTu65zf_JKIo8OkQRiieR-FrhuqD',
+    4: '1vQJGvAElE9wAiwo5p7Kji0SEWamk2B85',
+    5: '1lVGJ0KmKr08e5QjialpLAiqch1tDFHC6',
+    6: '1V7SyV0SkCLz0g36wtvxG3mlkSxoWxC94',
+    7: '1q9ENebnRAHkoJlW7jRO2EluP8RS_Y7IM'
+  };
+
+  for(let i=1; i<=7; i++) {
+    const card = document.createElement('div');
+    card.className = 'class-card';
+    card.onclick = () => openClassPage(i);
+    card.innerHTML = `
+      <div class="class-thumb">
+        <img src="https://drive.google.com/thumbnail?id=${classThumbIds[i]}&sz=w800" onerror="this.style.display='none'">
+      </div>
+      <div class="class-label"><span class="class-name">3年${i}組</span></div>
+    `;
+    grid.appendChild(card);
+  }
 }
 
 // ── パスワード認証 ──────────────────────────────────────
@@ -235,170 +248,147 @@ $('pwEnterBtn').onclick = () => {
   }
 };
 
-// ── Google API & データ取得 ─────────────────────────────
+// ── Google API & ふりがな取得 ─────────────────────────────
 async function initGAPI() {
   gapi.load('client', async () => {
     await gapi.client.init({ discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"] });
-    // 閲覧者でもシートの読み取りはAPIキーなしの公開フェッチで行う
     fetchNicksFromSheet();
   });
 }
 
 async function fetchNicksFromSheet() {
-  const classNums = [1,2,3,4,5,6,7];
-  for(const cls of classNums) {
+  for(let cls=1; cls<=7; cls++) {
     const sheetName = encodeURIComponent(`3年${cls}組`);
     const url = `https://docs.google.com/spreadsheets/d/${NICK_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${sheetName}`;
     try {
       const res = await fetch(url);
       const text = await res.text();
-      const rows = parseCSV(text);
+      const rows = text.split('\n').map(r => r.split(',').map(c => c.replace(/"/g, '')));
       rows.forEach(row => {
-        const name = row[2]; // C列
-        const nick = row[3]; // D列
-        const yomi = row[4]; // E列: ふりがな
+        const name = row[2]; // 名前
+        const nick = row[3]; // あだ名
+        const yomi = row[4]; // ふりがな
         if(!name || name === '名前') return;
 
-        // CLASS_COORDSにデータを注入
         const coords = CLASS_COORDS[cls];
         if(coords) {
-          ['page1', 'page2'].forEach(pKey => {
-            const person = coords[pKey]?.find(p => p.name === name);
-            if(person) {
-              person.nick = nick || '';
-              person.yomi = yomi || ''; // ふりがな保持
-            }
+          ['page1', 'page2'].forEach(pk => {
+            const person = coords[pk]?.find(p => p.name === name);
+            if(person) { person.nick = nick; person.yomi = yomi; }
           });
         }
       });
-    } catch(e) { console.error(e); }
+    } catch(e) {}
   }
 }
 
-function parseCSV(text) {
-  return text.split('\n').map(row => row.split(',').map(cell => cell.replace(/"/g, '')));
-}
-
-// ── 検索ロジック (ふりがな対応) ─────────────────────────
-function searchClassCoords(q) {
-  const results = [];
-  if(!q) return results;
-  for(let cls=1; cls<=7; cls++){
-    const coords = CLASS_COORDS[cls];
-    if(!coords) continue;
-    ['page1','page2'].forEach((pageKey, pi) => {
-      (coords[pageKey]||[]).forEach(person => {
-        const name = person.name || '';
-        const nick = person.nick || '';
-        const yomi = person.yomi || ''; // ふりがな
-        // 名前、あだ名、ふりがなのいずれかにヒット
-        if(name.includes(q) || nick.includes(q) || yomi.includes(q)) {
-          results.push({ ...person, classNum: cls, pageIndex: pi });
-        }
-      });
-    });
-  }
-  return results;
-}
-
-// ── UI生成 ──────────────────────────────────────────────
-function openClassPage(classNum, focusPerson) {
-  $('cpTitle').textContent = `3年${classNum}組`;
+// ── クラスページ表示 ──────────────────────────────────────
+function openClassPage(num) {
+  $('cpTitle').textContent = `3年${num}組`;
   const body = $('cpBody');
   body.innerHTML = '';
   
-  const scans = CLASS_SCANS[classNum];
-  const coords = CLASS_COORDS[classNum];
+  const scans = CLASS_SCANS[num];
+  const coords = CLASS_COORDS[num];
 
-  ['page1','page2'].forEach((pageKey, pi) => {
-    const scan = scans[pi];
+  scans.forEach((scan, pi) => {
+    const pageKey = pi === 0 ? 'page1' : 'page2';
     const pins = coords[pageKey] || [];
-    const block = document.createElement('div');
-    block.className = 'scan-block';
-    block.innerHTML = `
+    const wrap = document.createElement('div');
+    wrap.className = 'scan-block';
+    wrap.innerHTML = `
       <div class="scan-img-wrap" id="scanWrap${pi}">
-        <img src="https://drive.google.com/thumbnail?id=${scan.fileId}&sz=w1600" onload="attachPins(${pi}, ${scan.w}, ${scan.h}, ${JSON.stringify(pins).replace(/"/g,'&quot;')}, ${classNum})">
+        <img src="https://drive.google.com/thumbnail?id=${scan.fileId}&sz=w1600" onload="renderPins(${pi}, ${scan.w}, ${scan.h}, ${JSON.stringify(pins).replace(/"/g,'&quot;')})">
         <div class="name-pins" id="pins${pi}"></div>
       </div>`;
-    body.appendChild(block);
+    body.appendChild(wrap);
   });
   showScreen('classPage');
 }
 
-function attachPins(pi, origW, origH, pins, classNum) {
+function renderPins(pi, ow, oh, pins) {
   const wrap = $(`scanWrap${pi}`);
   const img = wrap.querySelector('img');
   const pinsEl = $(`pins${pi}`);
-  const scaleX = img.offsetWidth / origW;
-  const scaleY = img.offsetHeight / origH;
+  const sx = img.offsetWidth / ow;
+  const sy = img.offsetHeight / oh;
 
+  pinsEl.innerHTML = '';
   pins.forEach(p => {
     const pin = document.createElement('div');
     pin.className = 'name-pin';
-    pin.style.left = (p.x * scaleX) + 'px';
-    pin.style.top = (p.y * scaleY) + 'px';
+    pin.style.left = (p.x * sx) + 'px';
+    pin.style.top = (p.y * sy) + 'px';
     pin.innerHTML = `<div class="name-pin-dot"></div>`;
     pin.onclick = (e) => {
       e.stopPropagation();
-      openZoom(p, img.src, origW, origH, p.x * scaleX, p.y * scaleY, img.offsetWidth);
+      openZoom(p, img.src, ow, oh, p.x * sx, p.y * sy, img.offsetWidth);
     };
     pinsEl.appendChild(pin);
   });
 }
 
-function openZoom(person, imgSrc, origW, origH, px, py, dispW) {
+function openZoom(person, src, ow, oh, px, py, dw) {
   const range = person.type === 'teacher' ? 270 : 230;
-  const dispWPx = 350;
-  const scale = dispWPx / (range * 2);
-  
-  const bgSize = `${origW * scale}px ${origH * scale}px`;
-  const bgX = -( (px / (dispW/origW)) * scale - dispWPx / 2);
-  const bgY = -( (py / (dispW/origW)) * scale - (dispWPx*0.85) / 2);
+  const dWPx = 350;
+  const sc = dWPx / (range * 2);
+  const bgX = -( (px / (dw/ow)) * sc - dWPx / 2);
+  const bgY = -( (py / (dw/ow)) * sc - (dWPx*0.85) / 2);
 
-  $('zoomImgWrap').innerHTML = `<div style="width:100%;height:100%;background-image:url('${imgSrc}');background-size:${bgSize};background-position:${bgX}px ${bgY}px;"></div>`;
+  $('zoomImgWrap').innerHTML = `<div style="width:100%;height:100%;background-image:url('${src}');background-size:${ow*sc}px ${oh*sc}px;background-position:${bgX}px ${bgY}px;"></div>`;
   $('zoomName').textContent = person.name;
-  $('zoomYomi').textContent = person.yomi || ''; // ふりがな表示
-  $('zoomNickBadges').innerHTML = (person.nick||'').split(',').filter(Boolean).map(n => `<span class="nick-badge">「${n}」</span>`).join('');
+  $('zoomYomi').textContent = person.yomi || '';
+  $('zoomNickBadges').innerHTML = (person.nick||'').split(',').filter(Boolean).map(n => `<span style="background:rgba(201,168,76,0.15);padding:2px 8px;border-radius:10px;font-size:0.7rem;margin:2px;display:inline-block;">${n}</span>`).join('');
   $('zoomOverlay').classList.add('on');
 }
 
-// 検索入力イベント
+// ── 検索機能 (ふりがな対応) ──────────────────────────────
 $('viewSearch').oninput = (e) => {
   const q = e.target.value.trim();
   const grid = $('viewGrid');
-  const gridWrap = document.querySelector('.grid-wrap');
-  if(!q) {
-    gridWrap.style.display = 'none';
-    $('classGrid').style.display = 'flex';
-    return;
-  }
+  const gridWrap = $('searchGridWrap');
+  if(!q) { gridWrap.style.display = 'none'; $('classGrid').style.display = 'flex'; return; }
+  
   $('classGrid').style.display = 'none';
   gridWrap.style.display = 'block';
   grid.innerHTML = '';
   
-  const results = searchClassCoords(q);
-  results.forEach(p => {
-    const card = document.createElement('div');
-    card.className = 'photo-card';
-    card.innerHTML = `
-      <div class="img-wrap"><div style="padding:20px;color:white;">📚</div></div>
-      <div class="card-info">
-        <div class="c-name">${p.name}</div>
-        <div class="c-yomi">${p.yomi || ''}</div>
-        <div class="c-nick">${(p.nick||'').split(',').filter(Boolean).map(n=>`<span class="nick-badge">${n}</span>`).join('')}</div>
-      </div>`;
-    card.onclick = () => openClassPage(p.classNum);
-    grid.appendChild(card);
-  });
+  for(let cls=1; cls<=7; cls++){
+    const coords = CLASS_COORDS[cls];
+    ['page1','page2'].forEach(pk => {
+      (coords[pk]||[]).forEach(p => {
+        if((p.name||'').includes(q) || (p.yomi||'').includes(q) || (p.nick||'').includes(q)) {
+          const card = document.createElement('div');
+          card.className = 'photo-card';
+          card.innerHTML = `<div class="card-info"><div class="c-name">${p.name}</div><div class="c-yomi">${p.yomi||''}</div></div>`;
+          card.onclick = () => openClassPage(cls);
+          grid.appendChild(card);
+        }
+      });
+    });
+  }
 };
 
-// ── データ定数 (抜粋) ──────────────────────────────────
-const CLASS_SCANS = { /* 既存のIDリスト */ };
-const CLASS_COORDS = { /* 既存の座標リスト */ };
-// ※ ここに提供いただいた座標データを流し込みます。
+// ── データ ────────────────────────────────────────────────
+const CLASS_SCANS = {
+  1: [{fileId:'19zLP0RgQFjrFId7AJs7rXYpBbLuJF95-', w:3072, h:4080},{fileId:'1c8qR0FMqu9rrQ-LREp-dq8QYpiESEezv', w:3072, h:4080}],
+  2: [{fileId:'1wS0pzw1eYmE41TozeXr71Mt2xFG7W4bH', w:3072, h:4080},{fileId:'1XQwOcn9RMdlFs50is_-4JAtoIgEYbEwd', w:3072, h:4080}],
+  3: [{fileId:'18gyFtN54p-clYb7h6OpPfSFDUl3etl6D', w:3072, h:4080},{fileId:'19FOebLLx0fQzZ05CtsUfLZ6-h_BMeFhz', w:3072, h:4080}],
+  4: [{fileId:'1vqSYf-UWnOKBEeimMejcz9NoZUJG3MXj', w:3072, h:4080},{fileId:'1vBgVKK-GlbgTu0PzDs7m_WlH7le7cpFF', w:3072, h:4080}],
+  5: [{fileId:'1hDng0AbrFfZNwpduNfzC-apj3ObptloX', w:3072, h:4080},{fileId:'1YuljtBXpze2-R950v5BGCvRTBHamjRul', w:3072, h:4080}],
+  6: [{fileId:'1-uwC-cKzO9Vy2CufO2v_UqNJ1J6TWxr2', w:3072, h:4080},{fileId:'1PSex2Osgol0ozQ6Rl0GtuVG3GgevqbKK', w:3072, h:4080}],
+  7: [{fileId:'1TIub3fbMcJY_CRriRlpm_JdswW0luuVO', w:3072, h:4080},{fileId:'1jN7KSichOKTQ4CcIHkjF_MJrxskzZOPc', w:3072, h:4080}]
+};
 
-$('pwSchoolName').textContent = `${config.schoolName} ${config.year}卒業`;
-
+const CLASS_COORDS = {
+  1: { page1: [{id:'L01',name:'浅野大輔',x:332,y:734,type:'student'},{id:'L02',name:'芦川立身',x:332,y:1200,type:'student'},{id:'L03',name:'砥田憲幸',x:327,y:1659,type:'student'},{id:'L04',name:'池谷睦樹',x:312,y:2133,type:'student'},{id:'G11',name:'奥原元',x:892,y:2627,type:'student'},{id:'G12',name:'小黒俊之',x:1478,y:2647,type:'student'},{id:'G13',name:'加藤隆昭',x:2088,y:2642,type:'student'},{id:'G14',name:'佐藤惣右太',x:2713,y:2642,type:'student'},{id:'G21',name:'須賀健二郎',x:887,y:3126,type:'student'},{id:'G22',name:'鈴木治',x:1483,y:3131,type:'student'},{id:'G23',name:'高尾宜史',x:2103,y:3167,type:'student'},{id:'G24',name:'高島憲三',x:2738,y:3146,type:'student'},{id:'M102',name:'川村先生',x:1678,y:366,type:'teacher'},{id:'M103',name:'荻野谷先生',x:2288,y:367,type:'teacher'},{id:'M104',name:'伊藤正勝',x:309,y:2628,type:'student'},{id:'M105',name:'澤村文貴',x:299,y:3112,type:'student'}], page2: [{id:'T11',name:'角田哲雄',x:322,y:328,type:'student'},{id:'T21',name:'内藤孝明',x:322,y:758,type:'student'},{id:'T31',name:'中村友亮',x:322,y:1159,type:'student'},{id:'T12',name:'時田剛',x:882,y:278,type:'student'},{id:'T22',name:'中川雅之',x:892,y:728,type:'student'},{id:'T32',name:'姫井健史',x:892,y:1174,type:'student'},{id:'B11',name:'前田和弘',x:322,y:1626,type:'student'},{id:'B21',name:'浅野かおり',x:317,y:2090,type:'student'},{id:'B31',name:'鈴木雅子',x:322,y:2551,type:'student'},{id:'B41',name:'南部美保',x:322,y:3073,type:'student'},{id:'B12',name:'松野裕彦',x:877,y:1641,type:'student'},{id:'B22',name:'大井直子',x:892,y:2090,type:'student'},{id:'B32',name:'高田あい',x:897,y:2566,type:'student'},{id:'B42',name:'原小鈴',x:887,y:3073,type:'student'},{id:'B13',name:'山口徹',x:1456,y:1636,type:'student'},{id:'B23',name:'大久保淳子',x:1446,y:2095,type:'student'},{id:'B33',name:'内藤みどり',x:1472,y:2576,type:'student'},{id:'B43',name:'松澤奈々',x:1477,y:3063,type:'student'},{id:'B14',name:'尹善弘',x:2017,y:1626,type:'student'},{id:'B24',name:'香川美枝子',x:2032,y:2090,type:'student'},{id:'B34',name:'中山精枝',x:2052,y:2576,type:'student'},{id:'B44',name:'脇本恵里子',x:2042,y:3053,type:'student'},{id:'B15',name:'滝沢稔',x:2602,y:1616,type:'student'},{id:'B25',name:'木崎原麗',x:2627,y:2075,type:'student'},{id:'B35',name:'鳴川暁子',x:2632,y:2561,type:'student'},{id:'B45',name:'和田優子',x:2647,y:3043,type:'student'}] },
+  2: { page1: [{id:'T_kono',name:'河野先生',x:1733,y:497,type:'teacher'},{id:'T_hano',name:'濱野先生',x:2364,y:542,type:'teacher'},{id:'L01',name:'赤倉優蔵',x:357,y:1332,type:'student'},{id:'L02',name:'安藤芳和',x:357,y:1796,type:'student'},{id:'L03',name:'石崎裕史',x:347,y:2308,type:'student'},{id:'G11',name:'大田原幸司',x:927,y:2792,type:'student'},{id:'G12',name:'笠原健太朗',x:1522,y:2792,type:'student'},{id:'G13',name:'金子浩三',x:2123,y:2777,type:'student'},{id:'G14',name:'北林大作',x:2738,y:2807,type:'student'},{id:'G21',name:'坂内大祐',x:932,y:3258,type:'student'},{id:'G22',name:'佐藤光一郎',x:1522,y:3298,type:'student'},{id:'G23',name:'猿山裕司',x:2128,y:3318,type:'student'},{id:'G24',name:'鈴木睦正',x:2758,y:3313,type:'student'},{id:'M301',name:'黒住徹',x:368,y:3267,type:'student'},{id:'M302',name:'岩崎滋',x:358,y:2785,type:'student'}], page2: [{id:'T11',name:'染谷崇文',x:287,y:307,type:'student'},{id:'T21',name:'野口和徳',x:287,y:782,type:'student'},{id:'T31',name:'鈴木紀子',x:251,y:3237,type:'student'},{id:'T12',name:'平正一',x:922,y:322,type:'student'},{id:'T22',name:'日比徹',x:867,y:762,type:'student'},{id:'T32',name:'寺内佐知子',x:877,y:3237,type:'student'},{id:'B11',name:'百野秀臣',x:292,y:1246,type:'student'},{id:'B21',name:'古性基樹',x:282,y:1741,type:'student'},{id:'B31',name:'秋元千春',x:267,y:2216,type:'student'},{id:'B41',name:'海老原範栄',x:267,y:2710,type:'student'},{id:'B12',name:'藤井賢太郎',x:856,y:1235,type:'student'},{id:'B22',name:'保土田洋史',x:851,y:1736,type:'student'},{id:'B32',name:'新井美和',x:877,y:2221,type:'student'},{id:'B42',name:'岡田かおり',x:867,y:2710,type:'student'},{id:'B13',name:'茂木洋樹',x:1456,y:1714,type:'student'},{id:'B23',name:'粟野奈津子',x:1477,y:2194,type:'student'},{id:'B33',name:'金子加菜子',x:1467,y:2710,type:'student'},{id:'B43',name:'難波美恵',x:1472,y:3219,type:'student'},{id:'B14',name:'望月達也',x:2052,y:1704,type:'student'},{id:'B24',name:'飯島貴子',x:2068,y:2214,type:'student'},{id:'B34',name:'金恵順',x:2052,y:2725,type:'student'},{id:'B44',name:'橋場弥生',x:2063,y:3234,type:'student'},{id:'B15',name:'若林将史',x:2637,y:1704,type:'student'},{id:'B25',name:'伊藤有紀',x:2668,y:2204,type:'student'},{id:'B35',name:'斉藤百子',x:2663,y:2715,type:'student'},{id:'B45',name:'山中純子',x:2668,y:3229,type:'student'}] },
+  3: { page1: [{id:'T_suzuki',name:'鈴木先生',x:2009,y:355,type:'teacher'},{id:'L01',name:'岩満憲嗣',x:322,y:759,type:'student'},{id:'L02',name:'梅田信一郎',x:322,y:1262,type:'student'},{id:'L03',name:'太田光洋',x:322,y:1722,type:'student'},{id:'L04',name:'小川正昌彦',x:322,y:2238,type:'student'},{id:'G11',name:'兼子正樹',x:922,y:2670,type:'student'},{id:'G12',name:'亀田和彦',x:1522,y:2670,type:'student'},{id:'G13',name:'北城裕照',x:2123,y:2670,type:'student'},{id:'G14',name:'小暮義雄',x:2723,y:2670,type:'student'},{id:'G21',name:'坂上毅',x:917,y:3148,type:'student'},{id:'G22',name:'佐藤智哉',x:1517,y:3148,type:'student'},{id:'G23',name:'鈴木久志',x:2123,y:3153,type:'student'},{id:'G24',name:'高野成治',x:2738,y:3163,type:'student'},{id:'M500',name:'小用功',x:343,y:3160,type:'student'},{id:'M501',name:'奥田昌彦',x:327,y:2646,type:'student'}], page2: [{id:'T11',name:'田崎義章',x:342,y:340,type:'student'},{id:'T21',name:'田中旦',x:322,y:809,type:'student'},{id:'T12',name:'舘脇正充',x:917,y:345,type:'student'},{id:'B31',name:'北川友子',x:322,y:2654,type:'student'},{id:'B41',name:'蓮沼優美',x:307,y:3197,type:'student'},{id:'B43',name:'本田久美子',x:1507,y:3167,type:'student'},{id:'B14',name:'矢嶋信之',x:2037,y:1705,type:'student'},{id:'B24',name:'大野葉子',x:2052,y:2175,type:'student'},{id:'B34',name:'野口知子',x:2068,y:2669,type:'student'},{id:'B44',name:'宮下幸子',x:2088,y:3157,type:'student'},{id:'B15',name:'飯村ふみ枝',x:2612,y:1715,type:'student'},{id:'B25',name:'岡田雅子',x:2657,y:2185,type:'student'},{id:'B35',name:'荻原恵美子',x:2657,y:2669,type:'student'},{id:'B45',name:'山口潤子',x:2688,y:3162,type:'student'},{id:'M700',name:'宮寺三太',x:348,y:1724,type:'student'},{id:'M701',name:'石川ルリ子',x:323,y:2202,type:'student'},{id:'M702',name:'夜久直二',x:1487,y:1716,type:'student'},{id:'M703',name:'上野水穂',x:1497,y:2180,type:'student'},{id:'M704',name:'七森愛',x:1512,y:2674,type:'student'},{id:'M705',name:'幡場ゆかり',x:907,y:3177,type:'student'},{id:'M706',name:'斉藤美穂',x:917,y:2658,type:'student'},{id:'M707',name:'稲垣実子',x:916,y:2188,type:'student'},{id:'M708',name:'目黒大介',x:921,y:1724,type:'student'},{id:'M709',name:'船田丈博',x:353,y:1220,type:'student'},{id:'M710',name:'冨田和裕',x:922,y:776,type:'student'},{id:'M711',name:'堀川範人',x:907,y:1226,type:'student'}] },
+  4: { page1: [{id:'T_takahashi',name:'高橋先生',x:1703,y:547,type:'teacher'},{id:'T_okuyama',name:'奥山先生',x:2328,y:557,type:'teacher'},{id:'L01',name:'飯野雅弘',x:382,y:1326,type:'student'},{id:'L02',name:'大須賀泰三',x:382,y:1799,type:'student'},{id:'L03',name:'小川正洋',x:367,y:2252,type:'student'},{id:'L04',name:'小野陽崇',x:367,y:2721,type:'student'},{id:'G11',name:'角田光崇',x:932,y:2738,type:'student'},{id:'G12',name:'木村定由',x:1512,y:2728,type:'student'},{id:'G13',name:'工藤元樹',x:2083,y:2743,type:'student'},{id:'G14',name:'古室寛',x:2683,y:2748,type:'student'},{id:'G21',name:'征矢一浩',x:927,y:3217,type:'student'},{id:'G22',name:'高橋秀明',x:1512,y:3212,type:'student'},{id:'G23',name:'高松敏雄',x:2103,y:3232,type:'student'},{id:'G24',name:'永田淳一',x:2698,y:3247,type:'student'},{id:'M800',name:'佐藤哲郎',x:373,y:3195,type:'student'}], page2: [{id:'T11',name:'中丸聡',x:251,y:313,type:'student'},{id:'T21',name:'牧野隆昭',x:251,y:778,type:'student'},{id:'T31',name:'宮澤健太郎',x:322,y:1174,type:'student'},{id:'T12',name:'朴宙源',x:786,y:237,type:'student'},{id:'T32',name:'森純一',x:922,y:1174,type:'student'},{id:'B21',name:'荒川則子',x:251,y:2155,type:'student'},{id:'B31',name:'香椎真弓',x:236,y:2636,type:'student'},{id:'B41',name:'志田実希子',x:236,y:3148,type:'student'},{id:'B12',name:'山口剛嗣',x:816,y:1679,type:'student'},{id:'B22',name:'石井多恵子',x:826,y:2155,type:'student'},{id:'B32',name:'久門佐枝子',x:821,y:2631,type:'student'},{id:'B42',name:'中澤和子',x:826,y:3138,type:'student'},{id:'B13',name:'山田能之',x:1396,y:1669,type:'student'},{id:'B23',name:'砥井英恵',x:1421,y:2145,type:'student'},{id:'B33',name:'顧夏恵',x:1421,y:2631,type:'student'},{id:'B43',name:'中村妙',x:1416,y:3128,type:'student'},{id:'B14',name:'山本武秀',x:1947,y:1669,type:'student'},{id:'B24',name:'江幡由紀子',x:1957,y:2140,type:'student'},{id:'B34',name:'小宮静香',x:1977,y:2626,type:'student'},{id:'B44',name:'松浦千恵',x:1997,y:3118,type:'student'},{id:'B15',name:'吉野正人',x:2557,y:1659,type:'student'},{id:'B25',name:'遠藤麻美子',x:2572,y:2130,type:'student'},{id:'B35',name:'桜井美加',x:2577,y:2626,type:'student'},{id:'B45',name:'道畑まり子',x:2607,y:3128,type:'student'},{id:'M900',name:'馬渕圭',x:806,y:725,type:'student'},{id:'M902',name:'森田知宏',x:242,y:1684,type:'student'}] },
+  5: { page1: [{id:'T_enokido',name:'榎戸先生',x:1718,y:471,type:'teacher'},{id:'T_eguchi',name:'江口先生',x:2328,y:486,type:'teacher'},{id:'L01',name:'青龍太郎',x:357,y:812,type:'student'},{id:'L02',name:'阿久津裕二',x:352,y:1268,type:'student'},{id:'L03',name:'石井康義',x:337,y:1750,type:'student'},{id:'L04',name:'大山元博',x:337,y:2216,type:'student'},{id:'G11',name:'金子孝',x:912,y:2717,type:'student'},{id:'G12',name:'川田哲義',x:1482,y:2717,type:'student'},{id:'G13',name:'北島茂憲',x:2093,y:2737,type:'student'},{id:'G14',name:'久保田了司',x:2688,y:2757,type:'student'},{id:'G21',name:'杉山茂生',x:897,y:3207,type:'student'},{id:'G22',name:'鈴木聡史',x:1482,y:3232,type:'student'},{id:'G23',name:'高田昇一郎',x:2093,y:3247,type:'student'},{id:'G24',name:'高津知弘',x:2708,y:3267,type:'student'},{id:'M1000',name:'岡野竜介',x:323,y:2691,type:'student'},{id:'M1001',name:'倉澤茂伸',x:318,y:3185,type:'student'}], page2: [{id:'T11',name:'高橋雅也',x:322,y:275,type:'student'},{id:'T21',name:'樋代将郎',x:312,y:748,type:'student'},{id:'T31',name:'三島潤',x:312,y:1220,type:'student'},{id:'T12',name:'花井良',x:892,y:259,type:'student'},{id:'T22',name:'松浦新治',x:897,y:738,type:'student'},{id:'T32',name:'森永英司',x:897,y:1215,type:'student'},{id:'B11',name:'柳澤圭太',x:302,y:1697,type:'student'},{id:'B21',name:'石川夏織',x:302,y:2161,type:'student'},{id:'B31',name:'佐野博子',x:302,y:2695,type:'student'},{id:'B41',name:'松永陽子',x:297,y:3224,type:'student'},{id:'B12',name:'山柴悟',x:912,y:1692,type:'student'},{id:'B22',name:'一色理惠',x:892,y:2181,type:'student'},{id:'B32',name:'高田知子',x:917,y:2695,type:'student'},{id:'B42',name:'水落孝子',x:907,y:3199,type:'student'},{id:'B13',name:'山田真久',x:1482,y:1682,type:'student'},{id:'B23',name:'遠藤寛子',x:1497,y:2171,type:'student'},{id:'B33',name:'谷口羽衣子',x:1522,y:2670,type:'student'},{id:'B43',name:'向井聡子',x:1522,y:3174,type:'student'},{id:'B14',name:'領家伸佳',x:2063,y:1687,type:'student'},{id:'B24',name:'唐木麻也子',x:2083,y:2166,type:'student'},{id:'B34',name:'種井奈都子',x:2103,y:2665,type:'student'},{id:'B44',name:'村田友紀子',x:2123,y:3174,type:'student'},{id:'B15',name:'涌井一之',x:2668,y:1687,type:'student'},{id:'B25',name:'佐藤直子',x:2678,y:2161,type:'student'},{id:'B35',name:'遠山小百合',x:2723,y:2670,type:'student'},{id:'B45',name:'鷲尾美枝',x:2723,y:3174,type:'student'}] },
+  6: { page1: [{id:'T_tokunaga',name:'徳永先生',x:1819,y:471,type:'teacher'},{id:'T_satomi',name:'里見先生',x:2399,y:446,type:'teacher'},{id:'L01',name:'新井偵一',x:468,y:767,type:'student'},{id:'L02',name:'有馬祐輔',x:448,y:1250,type:'student'},{id:'L03',name:'石上敦人',x:448,y:1676,type:'student'},{id:'L04',name:'乾耕三',x:423,y:2140,type:'student'},{id:'G11',name:'大久保偵吾',x:988,y:2631,type:'student'},{id:'G12',name:'落合健二',x:1557,y:2641,type:'student'},{id:'G13',name:'木下雅史',x:2153,y:2666,type:'student'},{id:'G14',name:'越渕友基',x:2738,y:2682,type:'student'},{id:'G21',name:'定谷忠大',x:967,y:3105,type:'student'},{id:'G22',name:'佐藤武徳',x:1552,y:3135,type:'student'},{id:'G23',name:'洲崎大二',x:2143,y:3166,type:'student'},{id:'G24',name:'鈴木衛',x:2738,y:3196,type:'student'},{id:'M1200',name:'岩崎研一朗',x:413,y:2624,type:'student'},{id:'M1201',name:'佐久間康幸',x:388,y:3103,type:'student'}], page2: [{id:'T11',name:'高野宏一',x:372,y:293,type:'student'},{id:'T21',name:'外ノ池祐太',x:362,y:759,type:'student'},{id:'T31',name:'林功',x:362,y:1240,type:'student'},{id:'T12',name:'田村憲太郎',x:972,y:283,type:'student'},{id:'T22',name:'中澤暁',x:967,y:744,type:'student'},{id:'T32',name:'平林岳治',x:952,y:1255,type:'student'},{id:'B11',name:'松岡秀健',x:362,y:1720,type:'student'},{id:'B21',name:'飯野貴子',x:357,y:2202,type:'student'},{id:'B31',name:'田村奈津江',x:352,y:2705,type:'student'},{id:'B41',name:'増山明子',x:347,y:3217,type:'student'},{id:'B12',name:'室川泰斗',x:962,y:1710,type:'student'},{id:'B22',name:'今堀さやか',x:957,y:2192,type:'student'},{id:'B32',name:'中城美奈',x:967,y:2695,type:'student'},{id:'B42',name:'村越一美',x:952,y:3212,type:'student'},{id:'B13',name:'望月勤也',x:1542,y:1710,type:'student'},{id:'B23',name:'大室真由美',x:1552,y:2202,type:'student'},{id:'B33',name:'長沼綾',x:1547,y:2685,type:'student'},{id:'B43',name:'山中理津子',x:1522,y:3187,type:'student'},{id:'B14',name:'吉越一士',x:2138,y:1730,type:'student'},{id:'B24',name:'北原雅子',x:2123,y:2172,type:'student'},{id:'B34',name:'東川奈美',x:2123,y:2685,type:'student'},{id:'B44',name:'山本浩代',x:2158,y:3197,type:'student'},{id:'B15',name:'和栗富貴',x:2723,y:1690,type:'student'},{id:'B25',name:'菅澤美佐子',x:2723,y:2172,type:'student'},{id:'B35',name:'堀川良江',x:2723,y:2685,type:'student'},{id:'B45',name:'横森孝子',x:2723,y:3187,type:'student'}] },
+  7: { page1: [{id:'T_okuma',name:'大熊先生',x:2090,y:476,type:'teacher'},{id:'L01',name:'新井一臣',x:393,y:1295,type:'student'},{id:'L02',name:'荒川政喜',x:382,y:1768,type:'student'},{id:'G11',name:'磯部圭司',x:982,y:2723,type:'student'},{id:'G12',name:'伊東洋',x:1562,y:2698,type:'student'},{id:'G13',name:'大湯孝寛',x:2168,y:2703,type:'student'},{id:'G14',name:'萱垣伸',x:2773,y:2698,type:'student'},{id:'G21',name:'桐山大和',x:982,y:3211,type:'student'},{id:'G22',name:'桐生俊士',x:1562,y:3196,type:'student'},{id:'G23',name:'国弘一成',x:2183,y:3206,type:'student'},{id:'G24',name:'芝原大聡',x:2783,y:3231,type:'student'},{id:'M1400',name:'池田貴央',x:383,y:2223,type:'student'},{id:'M1401',name:'井瀬和男',x:408,y:2742,type:'student'},{id:'M1402',name:'川名雅之',x:393,y:3210,type:'student'}], page2: [{id:'T11',name:'島崎大輔',x:327,y:268,type:'student'},{id:'T21',name:'竹内玄',x:312,y:733,type:'student'},{id:'T31',name:'田幡茂',x:302,y:1192,type:'student'},{id:'T12',name:'高野聡史',x:897,y:268,type:'student'},{id:'T22',name:'田中隆博',x:892,y:723,type:'student'},{id:'T32',name:'鶴岡徹也',x:877,y:1182,type:'student'},{id:'B11',name:'伴井高明',x:292,y:1646,type:'student'},{id:'B21',name:'井口恵美子',x:277,y:2141,type:'student'},{id:'B31',name:'櫻内由規',x:277,y:2671,type:'student'},{id:'B41',name:'松井由美子',x:272,y:3181,type:'student'},{id:'B12',name:'二宮伸夫',x:887,y:1646,type:'student'},{id:'B22',name:'小野寛子',x:892,y:2131,type:'student'},{id:'B32',name:'神保ルミ',x:877,y:2626,type:'student'},{id:'B42',name:'水野友紀',x:882,y:3176,type:'student'},{id:'B13',name:'人見太虎',x:1477,y:1656,type:'student'},{id:'B23',name:'柿原眞里絵',x:1522,y:2101,type:'student'},{id:'B33',name:'高橋雅美',x:1517,y:2616,type:'student'},{id:'B43',name:'向原文子',x:1477,y:3146,type:'student'},{id:'B14',name:'松苗勝男',x:2012,y:1651,type:'student'},{id:'B24',name:'金子智絵',x:2047,y:2131,type:'student'},{id:'B34',name:'田中瑞紀',x:2078,y:2611,type:'student'},{id:'B44',name:'村越理江',x:2093,y:3131,type:'student'},{id:'B15',name:'宮城義一',x:2612,y:1646,type:'student'},{id:'B25',name:'齋藤美和',x:2642,y:2116,type:'student'},{id:'B35',name:'中山明子',x:2673,y:2616,type:'student'},{id:'B45',name:'渡邊千穂',x:2693,y:3126,type:'student'}] }
+};
 </script>
 </body>
 </html>
