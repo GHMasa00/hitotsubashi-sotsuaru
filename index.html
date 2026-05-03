@@ -1252,7 +1252,7 @@ function openZoom(person, imgSrc, origW, origH, px, py, dispW, dispH) {
   const isTeacher = person.type === 'teacher';
   const range = isTeacher ? 270 : 230;
   const ratio = isTeacher ? 1.2 : 0.85;
-  const dispWPx = 350;
+  const dispWPx = isTeacher ? 360 : 350;
   const dispHPx = Math.round(dispWPx * ratio);
 
   const scale = dispWPx / (range * 2);
