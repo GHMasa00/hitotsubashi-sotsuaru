@@ -387,6 +387,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
   </div>
   <div class="search-bar">
     <input id="viewSearch" type="search" placeholder="🔍 名前・ふりがな・あだ名で検索" autocomplete="off">
+    <button id="searchBackBtn" style="display:none;background:none;border:1px solid rgba(201,168,76,.4);border-radius:16px;color:var(--gold);font-size:.8rem;padding:.35rem .8rem;cursor:pointer;white-space:nowrap;">← 一覧に戻る</button>
   </div>
   <div class="class-grid" id="classGrid">
     <div class="class-card" data-class="1">
@@ -1898,40 +1899,35 @@ function renderSearchResults(q) {
     const faceY = person.y * coordScale;
     const scale = dispWPx / (range * 2);
     const bgSize = `${origW * scale}px ${origH * scale}px`;
-    const bgX = -(faceX * scale - dispWPx / 2);
+    // 左ズレ補正: +20px
+    const bgX = -(faceX * scale - dispWPx / 2) + 20;
     const bgY = -(faceY * scale - dispHPx / 2);
     const bgPos = `${bgX}px ${bgY}px`;
 
     const card = document.createElement('div');
     card.className = 'photo-card';
     card.style.animationDelay = `${Math.min(i, 0.15) * 0.04}s`;
-    // dispWPx×dispHPx の描画を CSS scale でカード幅に収める
-    // outer: overflow:hidden + aspect-ratio でカードサイズを決定
-    // inner: dispWPx×dispHPx で描画し、scale(var) で縮小
     card.innerHTML = `
       <div class="img-wrap" style="background:#1a1208;aspect-ratio:${dispWPx}/${dispHPx};position:relative;overflow:hidden;">
-        <div style="position:absolute;top:0;left:0;width:${dispWPx}px;height:${dispHPx}px;
+        <div class="portrait-inner" style="position:absolute;top:0;left:0;width:${dispWPx}px;height:${dispHPx}px;
           background-image:url('${imgUrl}');background-size:${bgSize};background-position:${bgPos};background-repeat:no-repeat;
-          transform-origin:top left;transform:scale(var(--card-scale,1));"></div>
+          transform-origin:top left;"></div>
         <div class="type-badge">3年${person.classNum}組</div>
       </div>
       <div class="card-info">
         <div class="c-name">${person.name}</div>
         <div class="c-nick">${(person.nick||'').split(',').map(n=>n.trim()).filter(Boolean).map(n=>`<span class='nick-badge'>「${n}」</span>`).join('')}</div>
-        <div class="c-yomi">${person.yomi||''}</div>
       </div>`;
     card.onclick = () => {
       openClassPage(person.classNum, person);
     };
     grid.appendChild(card);
-    // カード幅が確定してからscaleを設定
     requestAnimationFrame(() => {
       const wrap = card.querySelector('.img-wrap');
-      if(wrap) {
-        const cardW = wrap.offsetWidth || dispWPx;
-        const s = cardW / dispWPx;
-        const inner = wrap.querySelector('div');
-        if(inner) inner.style.transform = `scale(${s})`;
+      const inner = card.querySelector('.portrait-inner');
+      if(wrap && inner) {
+        const s = wrap.offsetWidth / dispWPx;
+        inner.style.transform = `scale(${s})`;
       }
     });
   });
@@ -1988,16 +1984,30 @@ $('viewSearch').oninput=()=>{
   const classGrid=document.getElementById('classGrid');
   const viewTabs=document.getElementById('viewTabs');
   const gridWrap=document.querySelector('.grid-wrap');
+  const backBtn=$('searchBackBtn');
   if(q){
     classGrid.style.display='none';
     viewTabs.style.display='none';
     gridWrap.style.display='block';
+    backBtn.style.display='inline-block';
     renderSearchResults(q);
   } else {
     classGrid.style.display='flex';
     viewTabs.style.display='none';
     gridWrap.style.display='none';
+    backBtn.style.display='none';
   }
+};
+
+$('searchBackBtn').onclick=()=>{
+  $('viewSearch').value='';
+  const classGrid=document.getElementById('classGrid');
+  const viewTabs=document.getElementById('viewTabs');
+  const gridWrap=document.querySelector('.grid-wrap');
+  classGrid.style.display='flex';
+  viewTabs.style.display='none';
+  gridWrap.style.display='none';
+  $('searchBackBtn').style.display='none';
 };
 
 // 写真詳細
