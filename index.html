@@ -1896,31 +1896,29 @@ function renderSearchResults(q) {
   }
   results.forEach((person, i) => {
     const scan = CLASS_SCANS[person.classNum][person.pageIndex];
-    const imgUrl = `https://drive.google.com/thumbnail?id=${scan.fileId}&sz=w800`;
+    const imgUrl = `https://drive.google.com/thumbnail?id=${scan.fileId}&sz=w1600`;
 
+    // openZoomと完全同一のクロップロジック
     const isTeacher = person.type === 'teacher';
-    // クロップ半径（800px画像基準）：ポートレート1枚にアップ
-    const cropHalfW = isTeacher ? 65 : 42;
-    const cropHalfH = isTeacher ? 85 : 58;
-    const headroomRatio = 0.35; // 顔座標より上に35%分の余白（頭頂部が切れないよう）
-    // 800px画像上の座標
-    const coordScale = 800 / (scan.w || 3072);
-    const faceX = person.x * coordScale; // ズレ補正なし
+    const range = isTeacher ? 270 : 230;
+    const ratio = isTeacher ? 1.2 : 0.85;
+    // 原画像上のクロップ範囲（range*2 x range*2*ratio）を1600px画像上に換算
+    const imgW = 1600;
+    const imgH = Math.round(1600 * (scan.h || 4080) / (scan.w || 3072));
+    const coordScale = 1600 / (scan.w || 3072);
+    const faceX = person.x * coordScale;
     const faceY = person.y * coordScale;
-    const cropW = cropHalfW * 2;
-    const cropH = cropHalfH * 2;
-    const imgW = 800;
-    const imgH = Math.round(800 * (scan.h || 4080) / (scan.w || 3072));
-    // cropTopを顔座標から上方向に余白を持たせる
-    const cropLeft = faceX - cropHalfW;
-    const cropTop  = faceY - cropHalfH * (1 + headroomRatio);
-    const maxBpX = imgW - cropW;
-    const maxBpY = imgH - cropH;
-    // background-size: 画像全体をカード(100%)に対して何倍か
+    const cropW = Math.round(range * 2 * coordScale);
+    const cropH = Math.round(range * 2 * ratio * coordScale);
+    // 中心をfaceXY（上下左右クランプ）
+    const cropLeft = Math.max(0, Math.min(faceX - cropW / 2, imgW - cropW));
+    const cropTop  = Math.max(0, Math.min(faceY - cropH / 2, imgH - cropH));
     const bsW = (imgW / cropW * 100).toFixed(2);
     const bsH = (imgH / cropH * 100).toFixed(2);
-    const bpX = maxBpX > 0 ? (Math.max(0, Math.min(cropLeft, maxBpX)) / maxBpX * 100).toFixed(2) : 50;
-    const bpY = maxBpY > 0 ? (Math.max(0, Math.min(cropTop,  maxBpY)) / maxBpY * 100).toFixed(2) : 50;
+    const maxBpX = imgW - cropW;
+    const maxBpY = imgH - cropH;
+    const bpX = maxBpX > 0 ? (cropLeft / maxBpX * 100).toFixed(2) : 50;
+    const bpY = maxBpY > 0 ? (cropTop  / maxBpY * 100).toFixed(2) : 50;
 
     const card = document.createElement('div');
     card.className = 'photo-card';
