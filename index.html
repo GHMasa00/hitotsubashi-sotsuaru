@@ -1899,25 +1899,26 @@ function renderSearchResults(q) {
     const imgUrl = `https://drive.google.com/thumbnail?id=${scan.fileId}&sz=w800`;
 
     const isTeacher = person.type === 'teacher';
-    // クロップ半径: ポートレート1枚分（顔+胸）に絞る
-    const cropHalfW = isTeacher ? 80 : 55;  // 800px画像基準の横クロップ半径
-    const cropHalfH = isTeacher ? 100 : 75; // 800px画像基準の縦クロップ半径
+    // クロップ半径（800px画像基準）：ポートレート1枚にアップ
+    const cropHalfW = isTeacher ? 65 : 42;
+    const cropHalfH = isTeacher ? 85 : 58;
+    const headroomRatio = 0.35; // 顔座標より上に35%分の余白（頭頂部が切れないよう）
     // 800px画像上の座標
     const coordScale = 800 / (scan.w || 3072);
-    const faceX = person.x * coordScale + 20; // 左ズレ補正
+    const faceX = person.x * coordScale; // ズレ補正なし
     const faceY = person.y * coordScale;
     const cropW = cropHalfW * 2;
     const cropH = cropHalfH * 2;
     const imgW = 800;
     const imgH = Math.round(800 * (scan.h || 4080) / (scan.w || 3072));
+    // cropTopを顔座標から上方向に余白を持たせる
+    const cropLeft = faceX - cropHalfW;
+    const cropTop  = faceY - cropHalfH * (1 + headroomRatio);
+    const maxBpX = imgW - cropW;
+    const maxBpY = imgH - cropH;
     // background-size: 画像全体をカード(100%)に対して何倍か
     const bsW = (imgW / cropW * 100).toFixed(2);
     const bsH = (imgH / cropH * 100).toFixed(2);
-    // background-position: クロップ左上端の位置をパーセントで
-    const cropLeft = faceX - cropHalfW;
-    const cropTop  = faceY - cropHalfH;
-    const maxBpX = imgW - cropW;
-    const maxBpY = imgH - cropH;
     const bpX = maxBpX > 0 ? (Math.max(0, Math.min(cropLeft, maxBpX)) / maxBpX * 100).toFixed(2) : 50;
     const bpY = maxBpY > 0 ? (Math.max(0, Math.min(cropTop,  maxBpY)) / maxBpY * 100).toFixed(2) : 50;
 
