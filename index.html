@@ -461,6 +461,7 @@ input,textarea{font-family:'Noto Serif JP',serif;font-size:16px;-webkit-text-siz
 <!-- ズームオーバーレイ -->
 <div id="zoomOverlay" class="zoom-overlay">
   <div class="zoom-inner" id="zoomInner">
+    <button id="zoomBackBtn" style="align-self:flex-start;background:none;border:1px solid rgba(201,168,76,.4);border-radius:16px;color:var(--gold);font-size:.8rem;padding:.35rem .8rem;cursor:pointer;margin-bottom:.5rem;">← 戻る</button>
     <div class="zoom-img-wrap" id="zoomImgWrap"></div>
     <div class="zoom-name" id="zoomName"></div>
     <div class="c-yomi" id="zoomYomi" style="text-align:center;font-size:.75rem;color:var(--faded);margin-bottom:.1rem;"></div>
@@ -1286,6 +1287,15 @@ function openZoom(person, imgSrc, origW, origH, px, py, dispW, dispH) {
   $('zoomOverlay').classList.add('on');
 }
 
+$('zoomBackBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  $('zoomOverlay').classList.remove('on');
+  document.querySelectorAll('.name-pin').forEach(el => el.classList.remove('active'));
+  clearHighlightCanvases();
+  $('zoomNickEdit').style.display = 'none';
+  $('zoomNickBtn').style.display  = 'inline-block';
+});
+
 $('zoomOverlay').addEventListener('click', () => {
   $('zoomOverlay').classList.remove('on');
   document.querySelectorAll('.name-pin').forEach(el => el.classList.remove('active'));
@@ -1888,59 +1898,44 @@ function renderSearchResults(q) {
     const scan = CLASS_SCANS[person.classNum][person.pageIndex];
     const imgUrl = `https://drive.google.com/thumbnail?id=${scan.fileId}&sz=w800`;
 
-    // openZoom と完全に同じ計算（px指定のまま、CSSのscaleで縮小）
     const isTeacher = person.type === 'teacher';
-    const range = isTeacher ? 270 : 230;
-    const ratio = isTeacher ? 1.2 : 0.85;
-    const dispWPx = 350;
-    const dispHPx = Math.round(dispWPx * ratio);
-    const origW = 800;
-    const origH = Math.round(800 * (scan.h || 4080) / (scan.w || 3072));
+    const range = isTeacher ? 270 : 230;   // クロップ半径（800px画像基準）
+    const ratio = isTeacher ? 1.2 : 0.85; // 縦横比
+    // 800px画像上の座標
     const coordScale = 800 / (scan.w || 3072);
-    const faceX = person.x * coordScale;
+    const faceX = person.x * coordScale + 20; // 左ズレ補正
     const faceY = person.y * coordScale;
-    const scale = dispWPx / (range * 2);
-    const bgSize = `${origW * scale}px ${origH * scale}px`;
-    // 左ズレ補正: +20px
-    const bgX = -(faceX * scale - dispWPx / 2) + 20;
-    const bgY = -(faceY * scale - dispHPx / 2);
-    const bgPos = `${bgX}px ${bgY}px`;
+    // カード表示サイズ（range*2 × range*2*ratio のクロップ）
+    const cropW = range * 2;
+    const cropH = range * 2 * ratio;
+    const imgW = 800;
+    const imgH = Math.round(800 * (scan.h || 4080) / (scan.w || 3072));
+    // background-size: 画像全体をカード(100%)に対して何倍か
+    const bsW = (imgW / cropW * 100).toFixed(2);
+    const bsH = (imgH / cropH * 100).toFixed(2);
+    // background-position: クロップ左上端の位置をパーセントで
+    const cropLeft = faceX - cropW / 2;
+    const cropTop  = faceY - cropH / 2;
+    const maxBpX = imgW - cropW;
+    const maxBpY = imgH - cropH;
+    const bpX = maxBpX > 0 ? (Math.max(0, Math.min(cropLeft, maxBpX)) / maxBpX * 100).toFixed(2) : 50;
+    const bpY = maxBpY > 0 ? (Math.max(0, Math.min(cropTop,  maxBpY)) / maxBpY * 100).toFixed(2) : 50;
 
     const card = document.createElement('div');
     card.className = 'photo-card';
-    card.style.animationDelay = `${Math.min(i, 0.15) * 0.04}s`;
+    card.style.animationDelay = `${Math.min(i, 20) * 0.04}s`;
     card.innerHTML = `
-      <div class="img-wrap" style="background:#1a1208;aspect-ratio:${dispWPx}/${dispHPx};position:relative;overflow:hidden;">
-        <div class="portrait-inner" style="position:absolute;top:0;left:0;width:${dispWPx}px;height:${dispHPx}px;
-          background-image:url('${imgUrl}');background-size:${bgSize};background-position:${bgPos};background-repeat:no-repeat;
-          transform-origin:top left;"></div>
+      <div class="img-wrap" style="aspect-ratio:${cropW}/${cropH};background:#1a1208;overflow:hidden;position:relative;">
+        <div style="width:100%;height:100%;background-image:url('${imgUrl}');background-size:${bsW}% ${bsH}%;background-position:${bpX}% ${bpY}%;background-repeat:no-repeat;"></div>
         <div class="type-badge">3年${person.classNum}組</div>
       </div>
       <div class="card-info">
         <div class="c-name">${person.name}</div>
         <div class="c-nick">${(person.nick||'').split(',').map(n=>n.trim()).filter(Boolean).map(n=>`<span class='nick-badge'>「${n}」</span>`).join('')}</div>
       </div>`;
-    card.onclick = () => {
-      openClassPage(person.classNum, person);
-    };
+    card.onclick = () => openClassPage(person.classNum, person);
     grid.appendChild(card);
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      const wrap = card.querySelector('.img-wrap');
-      const inner = card.querySelector('.portrait-inner');
-      if(wrap && inner && wrap.offsetWidth > 0) {
-        inner.style.transform = `scale(${wrap.offsetWidth / dispWPx})`;
-      }
-    }));
   });
-  // rAFが間に合わなかった場合の保険
-  setTimeout(() => {
-    grid.querySelectorAll('.portrait-inner').forEach(inner => {
-      const wrap = inner.closest('.img-wrap');
-      if(wrap && wrap.offsetWidth > 0) {
-        inner.style.transform = `scale(${wrap.offsetWidth / 350})`;
-      }
-    });
-  }, 150);
 }
 
 // ════════════════════════════════════════════════════════
