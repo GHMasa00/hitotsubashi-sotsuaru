@@ -1891,12 +1891,15 @@ function renderSearchResults(q) {
     const ratio = isTeacher ? 1.2 : 0.85;
     const dispWPx = 350;
     const dispHPx = Math.round(dispWPx * ratio);
-    const origW = scan.w || 3072;
-    const origH = scan.h || 4080;
+    const origW = 800;
+    const origH = Math.round(800 * (scan.h || 4080) / (scan.w || 3072));
+    const coordScale = 800 / (scan.w || 3072);
+    const faceX = person.x * coordScale;
+    const faceY = person.y * coordScale;
     const scale = dispWPx / (range * 2);
     const bgSize = `${origW * scale}px ${origH * scale}px`;
-    const bgX = -(person.x * scale - dispWPx / 2);
-    const bgY = -(person.y * scale - dispHPx / 2);
+    const bgX = -(faceX * scale - dispWPx / 2);
+    const bgY = -(faceY * scale - dispHPx / 2);
     const bgPos = `${bgX}px ${bgY}px`;
 
     const card = document.createElement('div');
