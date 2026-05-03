@@ -1258,7 +1258,8 @@ function openZoom(person, imgSrc, origW, origH, px, py, dispW, dispH) {
   const scale = dispWPx / (range * 2);
   const bgSize = `${origW * scale}px ${origH * scale}px`;
   const scaleOrig = dispW / origW;
-  const faceOrigX = px / scaleOrig;
+  const xOffsetOrig = isTeacher ? 80 : 50; // 原画像px
+  const faceOrigX = px / scaleOrig + xOffsetOrig;
   const faceOrigY = py / scaleOrig;
   const bgX = -(faceOrigX * scale - dispWPx / 2);
   const bgY = -(faceOrigY * scale - dispHPx / 2);
@@ -1898,19 +1899,18 @@ function renderSearchResults(q) {
     const scan = CLASS_SCANS[person.classNum][person.pageIndex];
     const imgUrl = `https://drive.google.com/thumbnail?id=${scan.fileId}&sz=w1600`;
 
-    // openZoomと完全同一のクロップロジック
+    // openZoomと同一ロジック＋x右方向オフセット補正
     const isTeacher = person.type === 'teacher';
     const range = isTeacher ? 270 : 230;
     const ratio = isTeacher ? 1.2 : 0.85;
-    // 原画像上のクロップ範囲（range*2 x range*2*ratio）を1600px画像上に換算
+    const xOffset = isTeacher ? 80 : 50; // 原画像px、座標が顔の左寄りのため右補正
     const imgW = 1600;
     const imgH = Math.round(1600 * (scan.h || 4080) / (scan.w || 3072));
     const coordScale = 1600 / (scan.w || 3072);
-    const faceX = person.x * coordScale;
+    const faceX = (person.x + xOffset) * coordScale;
     const faceY = person.y * coordScale;
     const cropW = Math.round(range * 2 * coordScale);
     const cropH = Math.round(range * 2 * ratio * coordScale);
-    // 中心をfaceXY（上下左右クランプ）
     const cropLeft = Math.max(0, Math.min(faceX - cropW / 2, imgW - cropW));
     const cropTop  = Math.max(0, Math.min(faceY - cropH / 2, imgH - cropH));
     const bsW = (imgW / cropW * 100).toFixed(2);
