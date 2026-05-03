@@ -1258,7 +1258,7 @@ function openZoom(person, imgSrc, origW, origH, px, py, dispW, dispH) {
   const scale = dispWPx / (range * 2);
   const bgSize = `${origW * scale}px ${origH * scale}px`;
   const scaleOrig = dispW / origW;
-  const xOffsetOrig = isTeacher ? 80 : 50; // 原画像px
+  const xOffsetOrig = isTeacher ? 20 : 25;
   const faceOrigX = px / scaleOrig + xOffsetOrig;
   const faceOrigY = py / scaleOrig;
   const bgX = -(faceOrigX * scale - dispWPx / 2);
@@ -1899,11 +1899,10 @@ function renderSearchResults(q) {
     const scan = CLASS_SCANS[person.classNum][person.pageIndex];
     const imgUrl = `https://drive.google.com/thumbnail?id=${scan.fileId}&sz=w1600`;
 
-    // openZoomと同一ロジック＋x右方向オフセット補正
     const isTeacher = person.type === 'teacher';
     const range = isTeacher ? 270 : 230;
     const ratio = isTeacher ? 1.2 : 0.85;
-    const xOffset = isTeacher ? 80 : 50; // 原画像px、座標が顔の左寄りのため右補正
+    const xOffset = isTeacher ? 20 : 25;
     const imgW = 1600;
     const imgH = Math.round(1600 * (scan.h || 4080) / (scan.w || 3072));
     const coordScale = 1600 / (scan.w || 3072);
